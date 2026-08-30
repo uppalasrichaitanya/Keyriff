@@ -1,0 +1,632 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #323437;
+  --color-surface: #2c2e31;
+  --color-surface-hi: #35373a;
+  --color-text: #d6d6d7;
+  --color-sub: #646669;
+  --color-error: #ca4754;
+  --color-error-extra: #7e2a33;
+  --color-accent: #e2b714;
+  --color-accent-2: #e2b714;
+
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --animate-blink: blink 1s steps(1) infinite;
+  --animate-pop: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes pop {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
+body {
+  background-color: var(--color-base);
+  background-image: radial-gradient(
+    1100px 520px at 50% -8%,
+    color-mix(in srgb, var(--color-accent) 4%, transparent),
+    transparent 62%
+  );
+  background-repeat: no-repeat;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-base);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sub) transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 60%, transparent);
+  outline-offset: 2px;
+}
+
+/* ---------- gradient helpers ---------- */
+
+.grad-accent {
+  background-color: var(--color-accent);
+  transition:
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.grad-text {
+  color: var(--color-accent);
+}
+
+[data-flair] .grad-accent {
+  background-image: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+}
+
+[data-flair] .grad-text {
+  background-image: linear-gradient(120deg, var(--color-accent), var(--color-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- aurora flair (premium themes) ---------- */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(110px);
+  opacity: var(--aurora-o, 1);
+  will-change: transform;
+}
+
+.aurora .a1 {
+  width: 42vw;
+  height: 42vw;
+  left: -8vw;
+  top: -12vh;
+  background: color-mix(in srgb, var(--color-accent-2) 13%, transparent);
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+
+.aurora .a2 {
+  width: 36vw;
+  height: 36vw;
+  right: -10vw;
+  top: 22vh;
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  animation: drift-b 32s ease-in-out infinite alternate;
+}
+
+.aurora .a3 {
+  width: 28vw;
+  height: 28vw;
+  left: 30vw;
+  bottom: -18vh;
+  background: color-mix(in srgb, var(--color-accent-2) 8%, transparent);
+  animation: drift-c 38s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(9vw, 8vh, 0) scale(1.15); }
+}
+
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.1); }
+  to { transform: translate3d(-8vw, -6vh, 0) scale(0.95); }
+}
+
+@keyframes drift-c {
+  from { transform: translate3d(0, 0, 0) scale(0.95); }
+  to { transform: translate3d(6vw, -9vh, 0) scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span {
+    animation: none;
+  }
+}
+
+/* ---------- glass panels (flair themes) ---------- */
+
+[data-flair] .glass {
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 8px 32px rgba(0, 0, 0, 0.35);
+  border: 1px solid
+    color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+/* light-theme flair softening */
+[data-theme="porcelain"] .glass,
+[data-theme="sakura"] .glass,
+[data-theme="lavender"] .glass,
+[data-theme="sepia"] .glass,
+[data-theme="studio"] .glass,
+[data-theme="peach"] .glass {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 30px -12px rgba(87, 66, 34, 0.28);
+}
+
+[data-theme="porcelain"] .kb-shadow,
+[data-theme="sakura"] .kb-shadow,
+[data-theme="lavender"] .kb-shadow,
+[data-theme="sepia"] .kb-shadow,
+[data-theme="studio"] .kb-shadow,
+[data-theme="peach"] .kb-shadow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(60, 48, 30, 0.22),
+    transparent 65%
+  );
+}
+
+/* ---------- caret ---------- */
+
+.caret-glow {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+.caret-bar {
+  background: var(--color-accent);
+}
+
+[data-flair] .caret-bar {
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-2));
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--color-accent) 65%, transparent),
+    0 0 30px color-mix(in srgb, var(--color-accent-2) 30%, transparent);
+}
+
+.shadow-accent {
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.shadow-accent-hover:hover {
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--color-accent) 42%, transparent);
+}
+
+/* ---------- keyboard (physical 3D, outlined laser keys) ---------- */
+
+.kb-scene {
+  perspective: 900px;
+  perspective-origin: 50% 22%;
+}
+
+.kb-parallax {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.kb-board {
+  transform: rotateX(26deg);
+  transform-style: preserve-3d;
+}
+
+.kb-frame {
+  position: relative;
+  transform-style: preserve-3d;
+  border-radius: 18px;
+  padding: 13px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 8%, transparent),
+    color-mix(in srgb, var(--color-accent) 3%, transparent)
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--color-accent) 38%, transparent);
+  box-shadow:
+    0 30px 60px -26px rgba(0, 0, 0, 0.72),
+    0 0 54px -14px color-mix(in srgb, var(--color-accent) 34%, transparent),
+    inset 0 0 36px -18px color-mix(in srgb, var(--color-accent) 48%, transparent);
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+.kb-frame::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 70%, transparent),
+    transparent
+  );
+}
+
+.kb-frame-front {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: -1px;
+  height: 19px;
+  transform-origin: bottom;
+  transform: rotateX(90deg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 20%, transparent),
+    color-mix(in srgb, var(--color-accent) 5%, transparent)
+  );
+  border-left: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  border-radius: 0 0 14px 14px;
+  pointer-events: none;
+}
+
+.kb-corner {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 2;
+}
+
+.kb-corner.tl {
+  left: 5px;
+  top: 5px;
+  border-left: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-top-left-radius: 8px;
+}
+
+.kb-corner.br {
+  right: 5px;
+  bottom: 5px;
+  border-right: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-bottom-right-radius: 8px;
+}
+
+.kb-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transform-style: preserve-3d;
+}
+
+.kb-row {
+  display: flex;
+  gap: 8px;
+  transform-style: preserve-3d;
+}
+
+/* layout slot — holds one 3D key box */
+.kb-key {
+  position: relative;
+  min-width: 0;
+  height: 44px;
+  transform-style: preserve-3d;
+}
+
+/* the moving body of the key */
+.kb-box {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transition: transform 240ms cubic-bezier(0.26, 1.85, 0.4, 1);
+  will-change: transform;
+}
+
+.kb-key.pressed .kb-box {
+  transform: translateZ(-12px);
+  transition: transform 50ms cubic-bezier(0.5, 0, 0.75, 0.6);
+}
+
+/* soft ground shadow beneath each floating key */
+.kb-box::before {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 30%;
+  bottom: -14%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.4),
+    transparent 68%
+  );
+  transform: translateZ(0.5px);
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.kb-key.pressed .kb-box::before {
+  transform: translateZ(0.5px) scale(0.9, 0.82);
+  opacity: 0.75;
+}
+
+/* ---- key faces ---- */
+
+.kb-top {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 1px solid
+    color-mix(in srgb, var(--color-accent) 42%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 13%, transparent),
+    color-mix(in srgb, var(--color-accent) 4%, transparent)
+  );
+  box-shadow:
+    inset 0 0 14px -6px color-mix(in srgb, var(--color-accent) 52%, transparent),
+    0 0 14px -5px color-mix(in srgb, var(--color-accent) 38%, transparent);
+  transform: translateZ(18px);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.25s ease;
+}
+
+.kb-top::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow:
+    0 0 18px 0 color-mix(in srgb, var(--color-accent) 48%, transparent),
+    inset 0 0 14px -5px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+.kb-key.next .kb-top {
+  border-color: color-mix(in srgb, var(--color-accent) 88%, transparent);
+}
+
+.kb-key.next .kb-top::after {
+  animation: key-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes key-breathe {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kb-key.next .kb-top::after {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
+.kb-key.caps-lit .kb-top {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.kb-key.caps-lit .kb-label {
+  color: var(--color-accent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.kb-key.pressed .kb-top {
+  border-color: var(--color-accent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, black 55%, transparent),
+      color-mix(in srgb, black 24%, transparent)
+    );
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--color-accent) 60%, transparent),
+    inset 0 10px 18px -8px
+      color-mix(in srgb, var(--color-accent) 65%, transparent),
+    0 0 26px -4px color-mix(in srgb, var(--color-accent) 62%, transparent);
+}
+
+.kb-key.pressed .kb-top::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* weak-key heat tint (sits under label, above face) */
+.kb-heat {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--heat-o, 0.5);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-error) 26%, transparent),
+    color-mix(in srgb, var(--color-error) 10%, transparent)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-error) 60%, transparent),
+    0 0 12px -2px color-mix(in srgb, var(--color-error) 45%, transparent);
+  transition: opacity 0.15s ease;
+}
+
+.kb-key.pressed .kb-heat {
+  opacity: calc(var(--heat-o, 0.5) * 0.35);
+}
+
+/* ---- extruded walls (front / left / right) ---- */
+
+.kb-wf,
+.kb-wl,
+.kb-wr {
+  position: absolute;
+  pointer-events: none;
+}
+
+.kb-wf {
+  left: 2px;
+  right: 2px;
+  bottom: -1px;
+  height: 18px;
+  transform-origin: bottom;
+  transform: rotateX(-90deg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 30%, transparent),
+    color-mix(in srgb, var(--color-accent) 6%, transparent)
+  );
+  border-radius: 0 0 6px 6px;
+}
+
+.kb-wl {
+  top: 2px;
+  bottom: -1px;
+  left: -1px;
+  width: 18px;
+  transform-origin: left;
+  transform: rotateY(-90deg);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent) 6%, transparent),
+    color-mix(in srgb, var(--color-accent) 28%, transparent)
+  );
+}
+
+.kb-wr {
+  top: 2px;
+  bottom: -1px;
+  right: -1px;
+  width: 18px;
+  transform-origin: right;
+  transform: rotateY(90deg);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent) 28%, transparent),
+    color-mix(in srgb, var(--color-accent) 6%, transparent)
+  );
+}
+
+.kb-key.pressed .kb-wf {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, black 45%, transparent),
+    color-mix(in srgb, var(--color-accent) 22%, transparent)
+  );
+}
+
+.kb-key.pressed .kb-wl {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent) 22%, transparent),
+    color-mix(in srgb, black 45%, transparent)
+  );
+}
+
+.kb-key.pressed .kb-wr {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, black 45%, transparent),
+    color-mix(in srgb, var(--color-accent) 22%, transparent)
+  );
+}
+
+/* ---- label ---- */
+
+.kb-label {
+  position: relative;
+  user-select: none;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-accent) 72%, var(--color-text));
+  transition:
+    color 0.15s ease,
+    text-shadow 0.2s ease;
+}
+
+.kb-key.next .kb-label {
+  color: var(--color-accent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+.kb-key.pressed .kb-label {
+  color: var(--color-text);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+
+.kb-reflection {
+  width: 68%;
+  height: 1px;
+  margin: 20px auto 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 48%, transparent),
+    transparent
+  );
+}
+
+.kb-shadow {
+  height: 24px;
+  width: 80%;
+  margin: 10px auto 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.4),
+    transparent 65%
+  );
+  filter: blur(7px);
+}

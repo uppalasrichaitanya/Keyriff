@@ -60,9 +60,15 @@ export const QUOTES = [
 
 const a = new Uint32Array(1)
 
+/* unbiased crypto random index (matches words.js) */
 function rand(n) {
-  crypto.getRandomValues(a)
-  return a[0] % n
+  const limit = Math.floor(0x100000000 / n) * n
+  let v = 0
+  do {
+    crypto.getRandomValues(a)
+    v = a[0]
+  } while (v >= limit)
+  return v % n
 }
 
 export function sampleQuote() {

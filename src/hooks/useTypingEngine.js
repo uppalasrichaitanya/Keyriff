@@ -9,11 +9,13 @@ import {
   pbKey,
   wordLenOpts,
   isTimedMode,
+  dateKey,
+  dailySeed,
 } from "../lib/engine"
-import { sampleWords } from "../lib/words"
+import { sampleWords, sampleWordsSeeded } from "../lib/words"
 
 function hasErrorBefore(cur, target) {
-  for (let i = 0; i < cur.length - 1; i++) {
+  for (let i = 0; i < cur.length; i++) {
     if (cur[i] !== target[i]) return true
   }
   return false
@@ -52,6 +54,7 @@ export function useTypingEngine(settings, handlers = {}) {
     [clockRef]
   )
   const getClock = useCallback(() => clockRef.value, [clockRef])
+  const getLimit = useCallback(() => clockRef.limit ?? Infinity, [clockRef])
 
   const wordsRef = useRef(words)
   wordsRef.current = words
@@ -91,11 +94,27 @@ export function useTypingEngine(settings, handlers = {}) {
     lastSnapRef.current = 0
     prevErrorsRef.current = 0
     seriesRef.current = []
+    const s = settingsRef.current
+    clockRef.limit = metaRef.current?.durationSec
+      ? metaRef.current.durationSec * 1000
+      : isTimedMode(s.mode)
+        ? s.timeValue * 1000
+        : Infinity
+    /* capture the daily key at start so a test that crosses
+       midnight still records under the day it began */
+    if (s.mode === "daily" && !metaRef.current) {
+      metaRef.current = {
+        key: `daily-${dateKey()}`,
+        label: `daily challenge · ${dateKey()}`,
+      }
+    }
     setStatus("running")
   }
 
   function pushSnapshots(elapsedMs) {
     const sec = Math.floor(elapsedMs / 1000)
+    /* a backgrounded tab can leave a huge gap — coalesce it */
+    if (sec - lastSnapRef.current > 60) lastSnapRef.current = sec - 1
     let added = false
     while (lastSnapRef.current < sec) {
       lastSnapRef.current++
@@ -126,9 +145,8 @@ export function useTypingEngine(settings, handlers = {}) {
     const ms = performance.now() - startRef.current
     const meta = metaRef.current
     const timeSec =
-      isTimedMode(s.mode)
-        ? s.timeValue
-        : meta?.durationSec ?? Math.max(1, ms / 1000)
+      meta?.durationSec ??
+      (isTimedMode(s.mode) ? s.timeValue : Math.max(1, ms / 1000))
     const minutes = timeSec / 60
     const c = { ...countersRef.current }
     const totalTyped = c.correct + c.incorrect + c.extra
@@ -170,17 +188,19 @@ export function useTypingEngine(settings, handlers = {}) {
     if (status !== "running") return
     let raf
     const tick = () => {
+      /* a restart/practice-start may have happened since this frame
+         was scheduled — never touch state for a dead test */
+      if (statusRef.current !== "running") return
       const s = settingsRef.current
       const el = performance.now() - startRef.current
       clockRef.value = el
-      clockRef.subs.forEach((cb) => cb())
+      for (const cb of [...clockRef.subs]) {
+        try {
+          cb()
+        } catch {}
+      }
       pushSnapshots(el)
-      const limitMs =
-        isTimedMode(s.mode)
-          ? s.timeValue * 1000
-          : metaRef.current?.durationSec != null
-            ? metaRef.current.durationSec * 1000
-            : Infinity
+      const limitMs = clockRef.limit ?? Infinity
       if (el >= limitMs) {
         finish()
         return
@@ -250,6 +270,11 @@ export function useTypingEngine(settings, handlers = {}) {
         let more
         if (gen) {
           more = gen(30)
+        } else if (s.mode === "daily") {
+          /* deterministic continuation: same words for everyone */
+          more = applyPunctuation(
+            sampleWordsSeeded(30, dailySeed() ^ (wi + 1))
+          )
         } else {
           more = sampleWords(30, wordLenOpts(s.wordLength))
           if (s.numbers) more = applyNumbers(more)
@@ -319,6 +344,7 @@ export function useTypingEngine(settings, handlers = {}) {
       return
     }
     if (e.key.length !== 1 || e.repeat) return
+    e.preventDefault()
     doChar(e.key)
   }
 
@@ -345,7 +371,9 @@ export function useTypingEngine(settings, handlers = {}) {
     setStats({ correct: 0, incorrect: 0, extra: 0 })
     statusRef.current = "idle"
     setStatus("idle")
+    startRef.current = 0
     clockRef.value = 0
+    clockRef.limit = Infinity
     clockRef.subs.forEach((cb) => cb())
     setErrorTick(0)
     finishedRef.current = false
@@ -369,7 +397,9 @@ export function useTypingEngine(settings, handlers = {}) {
       setStats({ correct: 0, incorrect: 0, extra: 0 })
       statusRef.current = "idle"
       setStatus("idle")
+      startRef.current = 0
       clockRef.value = 0
+      clockRef.limit = Infinity
       clockRef.subs.forEach((cb) => cb())
       setErrorTick(0)
       finishedRef.current = false
@@ -396,5 +426,6 @@ export function useTypingEngine(settings, handlers = {}) {
     startWith,
     subscribeClock,
     getClock,
+    getLimit,
   }
 }

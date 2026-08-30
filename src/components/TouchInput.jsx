@@ -11,6 +11,9 @@ function TouchInput({ dispatchKey, registerFocus }) {
     registerFocus?.(() => focusRef.current())
   }, [registerFocus])
 
+  /* feeds a synthetic single-character event through the engine */
+  const feed = (key) => dispatchKey({ key, preventDefault() {} })
+
   return (
     <>
       <input
@@ -25,13 +28,18 @@ function TouchInput({ dispatchKey, registerFocus }) {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onKeyDown={(e) => {
+          /* IMEs report "Unidentified" — let them write into the field
+             and let onChange turn the diff into keystrokes */
+          if (e.key === "Unidentified" || e.isComposing) return
           e.preventDefault()
           e.stopPropagation()
           dispatchKey(e)
         }}
         onKeyUp={(e) => e.preventDefault()}
-        onChange={() => {
-          if (inputRef.current) inputRef.current.value = ""
+        onChange={(e) => {
+          const v = e.target.value
+          e.target.value = ""
+          for (const ch of v) feed(ch)
         }}
         className="fixed left-1/2 top-1/2 h-px w-px -translate-x-1/2 -translate-y-1/2 opacity-0"
       />

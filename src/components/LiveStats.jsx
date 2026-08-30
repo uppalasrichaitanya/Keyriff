@@ -76,8 +76,11 @@ function LiveStats({
   settings,
   subscribeClock,
   getClock,
+  getLimit,
 }) {
   const elapsed = useSyncExternalStore(subscribeClock, getClock)
+  const limitMs = getLimit()
+  const timed = limitMs !== Infinity
 
   const streak = useMemo(() => {
     let s = 0
@@ -99,18 +102,12 @@ function LiveStats({
     return s
   }, [typed, words])
 
-  const durMs =
-    settings.mode === "time" || settings.mode === "daily"
-      ? settings.timeValue * 1000
-      : null
-  const timeLeft =
-    durMs != null
-      ? Math.max(0, Math.ceil((durMs - elapsed) / 1000))
-      : null
-  const wordsLeft =
-    settings.mode !== "time" && settings.mode !== "daily"
-      ? Math.max(0, words.length - (typed.length - 1))
-      : null
+  const timeLeft = timed
+    ? Math.max(0, Math.ceil((limitMs - elapsed) / 1000))
+    : null
+  const wordsLeft = !timed
+    ? Math.max(0, words.length - (typed.length - 1))
+    : null
   const big =
     status === "idle"
       ? null
@@ -128,25 +125,24 @@ function LiveStats({
   /* live wpm in the tab title while racing */
   useEffect(() => {
     if (running && liveWpm > 0) document.title = `${liveWpm} wpm · typer`
-  }, [running, liveWpm])
-  useEffect(() => {
-    if (status === "idle") document.title = "typer"
-  }, [status])
+    else if (status === "idle" || status === "finished")
+      document.title = "typer"
+  }, [running, liveWpm, status])
   useEffect(() => () => { document.title = "typer" }, [])
 
   /* countdown ticks for the last three seconds of a time test */
   const prevTickRef = useRef(null)
   useEffect(() => {
-    if (settings.mode !== "time" || !running) {
+    if (!timed || !running) {
       prevTickRef.current = null
       return
     }
-    const t = Math.max(0, Math.ceil((durMs - elapsed) / 1000))
+    const t = Math.max(0, Math.ceil((limitMs - elapsed) / 1000))
     if (prevTickRef.current !== t) {
       if (t >= 1 && t <= 3 && settings.sound) playTick()
       prevTickRef.current = t
     }
-  }, [elapsed, running, settings.mode, settings.timeValue, settings.sound])
+  }, [elapsed, running, timed, limitMs, settings.sound])
 
   /* streak milestone sparkle */
   const prevStreakRef = useRef(0)

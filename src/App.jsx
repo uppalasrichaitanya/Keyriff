@@ -18,6 +18,7 @@ import { applyTheme, getTheme } from "./lib/themes"
 import { rowOfChar, targetsFor } from "./lib/keys"
 import { sampleWeakWords } from "./lib/engine"
 import { screenMotion } from "./lib/motion"
+import { anyDialogOpen } from "./lib/dialogs"
 import {
   playError,
   playFinish,
@@ -160,7 +161,8 @@ export default function App() {
     },
     onFinish: (result) => {
       const existing = pbsRef.current[result.key]
-      const isPb = !existing || result.wpm > existing.wpm
+      const isPb =
+        result.key !== "practice" && (!existing || result.wpm > existing.wpm)
       if (settings.sound) (isPb ? playRecord() : playFinish())
       setLastResult({ ...result, isPb, prevPb: existing ?? null })
       if (isPb) {
@@ -205,18 +207,16 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
 
+  /* regenerate when generation settings change — but not on mount
+     (the engine already generates its first test). A settings
+     signature makes this StrictMode-safe. */
+  const genKey = `${settings.mode}|${settings.timeValue}|${settings.wordValue}|${settings.punctuation}|${settings.numbers}|${settings.wordLength}|${settings.customText}`
+  const genKeyRef = useRef(genKey)
   useEffect(() => {
+    if (genKeyRef.current === genKey) return
+    genKeyRef.current = genKey
     engineRestart()
-  }, [
-    engineRestart,
-    settings.mode,
-    settings.timeValue,
-    settings.wordValue,
-    settings.punctuation,
-    settings.numbers,
-    settings.wordLength,
-    settings.customText,
-  ])
+  }, [genKey, engineRestart])
 
   const heatMap = useMemo(() => {
     const map = {}
@@ -241,7 +241,18 @@ export default function App() {
       ) {
         return
       }
-      if (document.querySelector("[data-typer-modal]")) return
+      if (anyDialogOpen()) return
+      /* leave Tab/Enter to buttons, sliders and links when one has focus
+         (tabindex="-1" containers don't count — they're focus targets only) */
+      const ae = document.activeElement
+      const focusedInteractive =
+        ae &&
+        ae !== document.body &&
+        (ae.tagName === "BUTTON" ||
+          ae.tagName === "A" ||
+          ae.getAttribute("role") === "slider" ||
+          (ae.hasAttribute("tabindex") && ae.getAttribute("tabindex") !== "-1"))
+      if (focusedInteractive) return
       if (e.key === "Enter" && screen === "result") {
         e.preventDefault()
         engineRestart()
@@ -460,6 +471,7 @@ export default function App() {
                     settings={settings}
                     subscribeClock={engine.subscribeClock}
                     getClock={engine.getClock}
+                    getLimit={engine.getLimit}
                   />
                 )}
                 <TypingTest
@@ -476,7 +488,7 @@ export default function App() {
                 <ProgressBar
                   subscribeClock={engine.subscribeClock}
                   getClock={engine.getClock}
-                  settings={settings}
+                  getLimit={engine.getLimit}
                   wordCount={engineWords.length}
                   typedCount={typed.length}
                 />
@@ -490,6 +502,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setZen(false)}
                       title="exit zen mode"
+                      aria-label="exit zen mode"
                       className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <ShrinkIcon />
@@ -538,6 +551,7 @@ export default function App() {
                         setSettings((s) => ({ ...s, showHeat: !s.showHeat }))
                       }
                       title="show your weak keys on the keyboard"
+                      aria-label="toggle weak-key heat map"
                       aria-pressed={!!settings.showHeat}
                       className={`rounded-lg p-2.5 transition-colors duration-150 ${
                         settings.showHeat
@@ -556,6 +570,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setZen(true)}
                       title="zen mode — hide everything"
+                      aria-label="enter zen mode"
                       className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <ZenIcon />
@@ -565,6 +580,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={nextTest}
                       title="restart test"
+                      aria-label="restart test"
                       className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <RestartIcon />

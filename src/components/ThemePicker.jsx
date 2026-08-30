@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, memo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { THEMES } from "../lib/themes"
+import { dialogOpen, dialogClose } from "../lib/dialogs"
 
 function PaletteIcon() {
   return (
@@ -34,6 +35,7 @@ export default function ThemePicker({ themeId, onChange }) {
 
   useEffect(() => {
     if (!open) return
+    dialogOpen()
     const onDoc = (e) => {
       if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false)
     }
@@ -46,6 +48,7 @@ export default function ThemePicker({ themeId, onChange }) {
     document.addEventListener("mousedown", onDoc)
     document.addEventListener("keydown", onKey)
     return () => {
+      dialogClose()
       document.removeEventListener("mousedown", onDoc)
       document.removeEventListener("keydown", onKey)
     }
@@ -59,6 +62,7 @@ export default function ThemePicker({ themeId, onChange }) {
         onClick={() => setOpen((o) => !o)}
         aria-label="choose theme"
         aria-expanded={open}
+        aria-haspopup="true"
         title="choose theme"
         className={`rounded-lg p-2.5 transition-colors duration-150 ${
           open ? "text-text" : "text-sub hover:text-text"

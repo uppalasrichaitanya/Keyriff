@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, memo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { reduceMotion } from "../lib/motion"
+import { dialogOpen, dialogClose } from "../lib/dialogs"
 
 const TIME_VALUES = [15, 30, 60, 120]
 const WORD_VALUES = [10, 25, 50, 100]
@@ -15,7 +16,9 @@ const pillVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
 }
 
-function Pill({ active, children, onClick, label }) {
+/* group gives active pills a shared sliding indicator; toggles
+   without a group get a static highlight */
+function Pill({ active, children, onClick, label, group }) {
   return (
     <motion.button
       variants={pillVariants}
@@ -28,13 +31,16 @@ function Pill({ active, children, onClick, label }) {
         active ? "text-accent" : "text-sub hover:text-text"
       }`}
     >
-      {active && (
-        <motion.span
-          layoutId="cfg-active-pill"
-          transition={{ type: "spring", stiffness: 520, damping: 38 }}
-          className="absolute inset-0 rounded-md bg-accent/12 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_28%,transparent)]"
-        />
-      )}
+      {active &&
+        (group ? (
+          <motion.span
+            layoutId={group}
+            transition={{ type: "spring", stiffness: 520, damping: 38 }}
+            className="absolute inset-0 rounded-md bg-accent/12 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_28%,transparent)]"
+          />
+        ) : (
+          <span className="absolute inset-0 rounded-md bg-accent/12 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_28%,transparent)]" />
+        ))}
       <span className="relative z-10">{children}</span>
     </motion.button>
   )
@@ -50,6 +56,7 @@ function CustomTextModal({ initial, onStart, onClose }) {
 
   useEffect(() => {
     ref.current?.focus()
+    dialogOpen()
     const onKey = (e) => {
       if (e.key === "Escape") {
         e.stopPropagation()
@@ -57,7 +64,10 @@ function CustomTextModal({ initial, onStart, onClose }) {
       }
     }
     document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
+    return () => {
+      dialogClose()
+      document.removeEventListener("keydown", onKey)
+    }
   }, [])
 
   const words = draft.trim() ? draft.trim().split(/\s+/).length : 0
@@ -79,6 +89,9 @@ function CustomTextModal({ initial, onStart, onClose }) {
         exit={{ scale: 0.94, y: 10 }}
         transition={{ type: "spring", stiffness: 320, damping: 26 }}
         onMouseDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="custom text"
         className="glass max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-5 shadow-2xl"
       >
         <h3 className="mb-1 text-base font-semibold text-text">custom text</h3>
@@ -170,6 +183,7 @@ function ConfigBar({ settings, onChange }) {
           )}
 
         <Pill
+          group="cfg-mode"
           label="time mode"
           active={settings.mode === "time"}
           onClick={() => set({ mode: "time" })}
@@ -177,6 +191,7 @@ function ConfigBar({ settings, onChange }) {
           clock time
         </Pill>
         <Pill
+          group="cfg-mode"
           label="words mode"
           active={settings.mode === "words"}
           onClick={() => set({ mode: "words" })}
@@ -184,6 +199,7 @@ function ConfigBar({ settings, onChange }) {
           abc words
         </Pill>
         <Pill
+          group="cfg-mode"
           label="quotes mode"
           active={settings.mode === "quote"}
           onClick={() => set({ mode: "quote" })}
@@ -191,6 +207,7 @@ function ConfigBar({ settings, onChange }) {
           ❝ quotes
         </Pill>
         <Pill
+          group="cfg-mode"
           label="daily challenge"
           active={settings.mode === "daily"}
           onClick={() => set({ mode: "daily" })}
@@ -198,6 +215,7 @@ function ConfigBar({ settings, onChange }) {
           ◉ daily
         </Pill>
         <Pill
+          group="cfg-mode"
           label="custom text mode"
           active={isCustom}
           onClick={handleCustomClick}
@@ -248,6 +266,7 @@ function ConfigBar({ settings, onChange }) {
             {(settings.mode === "time" ? TIME_VALUES : WORD_VALUES).map((v) => (
               <Pill
                 key={v}
+                group="cfg-val"
                 label={`set ${v}`}
                 active={
                   settings.mode === "time"

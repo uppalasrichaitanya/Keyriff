@@ -14,6 +14,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
       },
       manifest: {
+        id: '/',
         name: 'typer',
         short_name: 'typer',
         description: 'a beautiful way to practice typing',

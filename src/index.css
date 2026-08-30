@@ -5,7 +5,7 @@
   --color-surface: #2c2e31;
   --color-surface-hi: #35373a;
   --color-text: #d6d6d7;
-  --color-sub: #646669;
+  --color-sub: #70737a;
   --color-error: #ca4754;
   --color-error-extra: #7e2a33;
   --color-accent: #e2b714;
@@ -397,10 +397,6 @@ button {
 }
 
 /* ---------- caret ---------- */
-
-.caret-glow {
-  box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 55%, transparent);
-}
 
 .caret-bar {
   background: var(--color-accent);

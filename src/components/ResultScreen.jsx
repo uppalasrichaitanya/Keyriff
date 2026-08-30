@@ -53,6 +53,11 @@ function SmallStat({ label, children }) {
   )
 }
 
+function CountUpStat({ label, value, decimals = 0, suffix = "" }) {
+  const shown = useCountUp(value, { decimals })
+  return <SmallStat label={label}>{shown}{suffix}</SmallStat>
+}
+
 function Confetti() {
   const [pieces, setPieces] = useState(null)
 
@@ -105,8 +110,6 @@ function Confetti() {
 }
 
 export default function ResultScreen({ result, onNext }) {
-  const consistency = useCountUp(result.consistency)
-  const raw = useCountUp(result.rawWpm)
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(null)
 
@@ -122,6 +125,8 @@ export default function ResultScreen({ result, onNext }) {
   }
 
   async function shareResult() {
+    if (shared === "...") return
+    setShared("...")
     try {
       const { dataUrl, blob } = await renderShareCard(result)
       let ok = false
@@ -141,7 +146,10 @@ export default function ResultScreen({ result, onNext }) {
       }
       setShared(ok ? "copied!" : "saved!")
       setTimeout(() => setShared(null), 1600)
-    } catch {}
+    } catch {
+      setShared("failed")
+      setTimeout(() => setShared(null), 1600)
+    }
   }
 
   return (
@@ -217,8 +225,8 @@ export default function ResultScreen({ result, onNext }) {
           <BigStat value={result.accuracy} decimals={1} suffix="%" label="accuracy" />
         </div>
         <div className="relative flex min-w-56 flex-col gap-1.5">
-          <SmallStat label="raw">{raw}</SmallStat>
-          <SmallStat label="consistency">{consistency}%</SmallStat>
+          <CountUpStat label="raw" value={result.rawWpm} />
+          <CountUpStat label="consistency" value={result.consistency} suffix="%" />
           <SmallStat label="time">{result.timeSec}s</SmallStat>
           <SmallStat label="chars">
             <span className="text-text" title="correct">

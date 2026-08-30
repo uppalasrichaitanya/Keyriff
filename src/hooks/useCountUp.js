@@ -17,5 +17,5 @@ export function useCountUp(target, { duration = 900, decimals = 0 } = {}) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [target, duration])
 
-  return (value * Math.pow(10, decimals)).toFixed(decimals)
+  return value.toFixed(decimals)
 }

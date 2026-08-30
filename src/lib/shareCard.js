@@ -25,7 +25,16 @@ function withAlpha(color, alpha) {
 
 function rr(ctx, x, y, w, h, r) {
   ctx.beginPath()
-  ctx.roundRect(x, y, w, h, r)
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, r)
+  } else {
+    ctx.moveTo(x + r, y)
+    ctx.arcTo(x + w, y, x + w, y + h, r)
+    ctx.arcTo(x + w, y + h, x, y + h, r)
+    ctx.arcTo(x, y + h, x, y, r)
+    ctx.arcTo(x, y, x + w, y, r)
+    ctx.closePath()
+  }
   ctx.fill()
 }
 
@@ -114,10 +123,11 @@ export async function renderShareCard(result) {
     ctx.fillStyle = t.text
     ctx.font = `800 40px ${FONT}`
     ctx.fillText(value, cx, 520)
+    const valueW = ctx.measureText(value).width
     ctx.fillStyle = t.sub
     ctx.font = `500 22px ${FONT}`
     ctx.fillText(label.toUpperCase(), cx, 556)
-    cx += ctx.measureText(value).width + 90
+    cx += valueW + 90
   }
 
   /* footer */

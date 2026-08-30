@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import ProgressChart from "./ProgressChart"
 import { codeLabel } from "../lib/keys"
@@ -26,7 +26,7 @@ function relTime(ts) {
 function fmtTime(sec) {
   if (sec < 60) return `${Math.round(sec)}s`
   const m = Math.floor(sec / 60)
-  const s = Math.round(sec % 60)
+  const s = Math.floor(sec % 60)
   if (m < 60) return `${m}m ${s}s`
   return `${Math.floor(m / 60)}h ${m % 60}m`
 }
@@ -85,6 +85,7 @@ export default function StatsPage({
   onPractice,
 }) {
   const fileRef = useRef(null)
+  const [notice, setNotice] = useState(null)
 
   const stats = useMemo(() => {
     if (!history.length) return null
@@ -181,8 +182,11 @@ export default function StatsPage({
         const data = JSON.parse(txt)
         if (data?.app !== "typer") throw new Error("not a typer backup")
         onImport(data)
+        setNotice("backup imported")
+        setTimeout(() => setNotice(null), 2500)
       } catch {
-        alert("couldn't import — that doesn't look like a typer backup file")
+        setNotice("couldn't read that file")
+        setTimeout(() => setNotice(null), 2500)
       }
     })
   }
@@ -382,7 +386,7 @@ export default function StatsPage({
             <div>
               <div className="text-sm font-medium text-text">your data</div>
               <div className="text-xs text-sub">
-                everything stays in this browser — export a backup anytime
+                {notice ?? "everything stays in this browser — export a backup anytime"}
               </div>
             </div>
             <div className="flex gap-2">

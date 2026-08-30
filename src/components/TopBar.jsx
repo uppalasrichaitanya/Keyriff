@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, memo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import ThemePicker from "./ThemePicker"
 import { SOUND_PACKS, playKey, DEFAULT_PACK } from "../lib/sound"
+import { dialogOpen, dialogClose } from "../lib/dialogs"
 
 function ChartIcon() {
   return (
@@ -38,6 +39,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
 
   useEffect(() => {
     if (!open) return
+    dialogOpen()
     const onDoc = (e) => {
       if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false)
     }
@@ -50,6 +52,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
     document.addEventListener("mousedown", onDoc)
     document.addEventListener("keydown", onKey)
     return () => {
+      dialogClose()
       document.removeEventListener("mousedown", onDoc)
       document.removeEventListener("keydown", onKey)
     }
@@ -63,6 +66,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
         onClick={() => setOpen((o) => !o)}
         aria-label="sound settings"
         aria-expanded={open}
+        aria-haspopup="true"
         title={`sound ${sound ? "on" : "muted"} · ${volume}%`}
         className={`rounded-lg p-2.5 transition-colors duration-150 ${
           sound && volume > 0
@@ -117,6 +121,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
                 min="0"
                 max="100"
                 value={volume}
+                disabled={!sound}
                 onChange={(e) => onVolume(Number(e.target.value))}
                 aria-label="volume level"
                 className="w-full cursor-pointer accent-accent"

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Keyboard from "./Keyboard"
 import { targetsFor } from "../lib/keys"
+import { reduceMotion } from "../lib/motion"
 
 function PlayIcon() {
   return (
@@ -63,7 +64,7 @@ export default function TypingReplay({ result }) {
   const duration =
     schedule.length > 0 ? schedule[schedule.length - 1].t + 500 : 0
 
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(() => !reduceMotion())
   const [speedIdx, setSpeedIdx] = useState(0)
   const [pos, setPos] = useState(0)
   const [pressed, setPressed] = useState(() => new Set())

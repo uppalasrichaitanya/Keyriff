@@ -35,7 +35,7 @@ function audio() {
     comp.connect(ctx.destination)
     buildReverb()
   }
-  if (ctx.state === "suspended") ctx.resume()
+  if (ctx.state === "suspended") ctx.resume().catch(() => {})
   return ctx
 }
 
@@ -64,7 +64,7 @@ function out(node) {
 
 function noise(c) {
   if (!noiseBuffer) {
-    noiseBuffer = c.createBuffer(1, c.sampleRate * 0.12, c.sampleRate)
+    noiseBuffer = c.createBuffer(1, Math.floor(c.sampleRate * 0.12), c.sampleRate)
     const data = noiseBuffer.getChannelData(0)
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
   }

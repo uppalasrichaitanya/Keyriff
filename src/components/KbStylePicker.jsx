@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, memo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import { dialogOpen, dialogClose } from "../lib/dialogs"
 
 export const KB_STYLES = [
   { id: "laser", name: "laser" },
@@ -25,6 +26,7 @@ function KbStylePicker({ value, onChange }) {
 
   useEffect(() => {
     if (!open) return
+    dialogOpen()
     const onDoc = (e) => {
       if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false)
     }
@@ -37,6 +39,7 @@ function KbStylePicker({ value, onChange }) {
     document.addEventListener("mousedown", onDoc)
     document.addEventListener("keydown", onKey)
     return () => {
+      dialogClose()
       document.removeEventListener("mousedown", onDoc)
       document.removeEventListener("keydown", onKey)
     }
@@ -50,6 +53,7 @@ function KbStylePicker({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         aria-label="keyboard style"
         aria-expanded={open}
+        aria-haspopup="true"
         title="keyboard style"
         className={`rounded-lg p-2.5 transition-colors duration-150 ${
           open || value !== "laser" ? "text-accent" : "text-sub hover:text-text"

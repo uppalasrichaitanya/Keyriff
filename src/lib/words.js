@@ -113,9 +113,15 @@ export const WORDS = [
 
 const a = new Uint32Array(1)
 
+/* unbiased crypto random index */
 function rand(n) {
-  crypto.getRandomValues(a)
-  return a[0] % n
+  const limit = Math.floor(0x100000000 / n) * n
+  let v = 0
+  do {
+    crypto.getRandomValues(a)
+    v = a[0]
+  } while (v >= limit)
+  return v % n
 }
 
 /* deterministic PRNG for the daily challenge */
@@ -130,12 +136,14 @@ export function mulberry32(seed) {
   }
 }
 
-function sampleFrom(pool, n, rng) {
+function sampleFrom(pool, n, drawIndex) {
   const out = []
   const recent = []
+  /* pools small enough to saturate the recent-window can't reject repeats */
+  const skipRecent = pool.length > 15
   while (out.length < n) {
-    const w = pool[Math.floor(rng() * pool.length)]
-    if (recent.includes(w)) continue
+    const w = pool[drawIndex(pool.length)]
+    if (skipRecent && recent.includes(w)) continue
     out.push(w)
     recent.push(w)
     if (recent.length > 14) recent.shift()
@@ -148,16 +156,7 @@ export function sampleWords(n, { min = 0, max = Infinity } = {}) {
     min > 0 || max < Infinity
       ? WORDS.filter((w) => w.length >= min && w.length <= max)
       : WORDS
-  const out = []
-  const recent = []
-  while (out.length < n) {
-    const w = pool[rand(pool.length)]
-    if (recent.includes(w)) continue
-    out.push(w)
-    recent.push(w)
-    if (recent.length > 14) recent.shift()
-  }
-  return out
+  return sampleFrom(pool, n, (len) => rand(len))
 }
 
 export function sampleWordsSeeded(n, seed, { min = 0, max = Infinity } = {}) {
@@ -165,5 +164,6 @@ export function sampleWordsSeeded(n, seed, { min = 0, max = Infinity } = {}) {
     min > 0 || max < Infinity
       ? WORDS.filter((w) => w.length >= min && w.length <= max)
       : WORDS
-  return sampleFrom(pool, n, mulberry32(seed))
+  const rng = mulberry32(seed)
+  return sampleFrom(pool, n, (len) => Math.floor(rng() * len))
 }

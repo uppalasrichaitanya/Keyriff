@@ -8,7 +8,7 @@ const DESIGN_W = 760
 const DESIGN_H = 352
 
 
-function Key({ k, isPressed, isGlow, isCapsLit, heatRatio }) {
+const Key = memo(function Key({ k, isPressed, isGlow, isCapsLit, heatRatio }) {
   const state = isPressed
     ? "pressed"
     : k.code === "CapsLock" && isCapsLit
@@ -40,7 +40,7 @@ function Key({ k, isPressed, isGlow, isCapsLit, heatRatio }) {
       </div>
     </div>
   )
-}
+})
 
 function Keyboard({
   nextChar,
@@ -127,7 +127,16 @@ function Keyboard({
       )
     }
     const down = (e) => {
-      if (e.repeat || isEditable(e)) return
+      if (isEditable(e)) return
+      if (e.repeat) {
+        /* keep the key visually held while the OS repeats it */
+        clearTimeout(timersRef.current.get(e.code))
+        timersRef.current.set(
+          e.code,
+          setTimeout(() => release(e.code), 240)
+        )
+        return
+      }
       press(e.code)
     }
     const up = (e) => {
@@ -164,6 +173,7 @@ function Keyboard({
       ref={fitRef}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
+      aria-hidden="true"
       className={`select-none px-1 ${compact ? "" : "mt-10 pb-2 pt-3"}`}
     >
       <div

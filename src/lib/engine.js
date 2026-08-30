@@ -80,10 +80,9 @@ export function applyPunctuation(words, rng = Math.random) {
       } else if (roll < 0.24 && i < words.length - 1 && sinceStop > 2) {
         w = w + ";"
       }
-      if (w[0] !== w[0].toLowerCase()) w = capitalize(w)
       sinceStop--
     }
-    if (i === words.length - 1 && !/[.!?]$/.test(w)) w = w + "."
+    if (i === words.length - 1 && !/[.!?;,]$/.test(w)) w = w + "."
     out.push(w)
   }
   return out

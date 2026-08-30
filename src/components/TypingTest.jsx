@@ -84,6 +84,10 @@ function TypingTest({
   const springX = useSpring(caretX, { stiffness: 950, damping: 34, mass: 0.28 })
   const [scrollY, setScrollY] = useState(0)
   const [typing, setTyping] = useState(false)
+  /* line height only changes with size/zen — avoid a per-keystroke
+     forced layout read */
+  const lineHRef = useRef(0)
+  const lineHKeyRef = useRef("")
 
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
@@ -128,10 +132,15 @@ function TypingTest({
       caretY.jump(y)
     }
 
-    const lineH = parseFloat(getComputedStyle(wordEl).lineHeight) || 48
+    const sizeKey = `${fontSize}-${zen}`
+    if (lineHKeyRef.current !== sizeKey || !lineHRef.current) {
+      lineHRef.current = parseFloat(getComputedStyle(wordEl).lineHeight) || 48
+      lineHKeyRef.current = sizeKey
+    }
+    const lineH = lineHRef.current
     const activeLine = Math.round((wordEl.offsetTop + 1) / lineH)
     setScrollY(-Math.max(0, activeLine - 1) * lineH)
-  }, [typed, wordIndex, words, currentInput.length, caretX, caretY])
+  }, [typed, wordIndex, words, currentInput.length, caretX, caretY, fontSize, zen])
 
   useEffect(() => {
     if (errorTick === 0) return

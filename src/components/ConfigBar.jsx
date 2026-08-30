@@ -146,26 +146,28 @@ function ConfigBar({ settings, onChange }) {
         {...(reduceMotion() ? { initial: false } : { initial: "hidden", animate: "show" })}
         className="flex flex-wrap items-center justify-center gap-0.5 select-none"
       >
-        {settings.mode !== "quote" && settings.mode !== "custom" && (
-          <>
-            <Pill
-              label="punctuation"
-              active={settings.punctuation}
-              onClick={() => set({ punctuation: !settings.punctuation })}
-            >
-              @ punctuation
-            </Pill>
-            <Pill
-              label="numbers"
-              active={settings.numbers}
-              onClick={() => set({ numbers: !settings.numbers })}
-            >
-              # numbers
-            </Pill>
+        {settings.mode !== "quote" &&
+          settings.mode !== "custom" &&
+          settings.mode !== "daily" && (
+            <>
+              <Pill
+                label="punctuation"
+                active={settings.punctuation}
+                onClick={() => set({ punctuation: !settings.punctuation })}
+              >
+                @ punctuation
+              </Pill>
+              <Pill
+                label="numbers"
+                active={settings.numbers}
+                onClick={() => set({ numbers: !settings.numbers })}
+              >
+                # numbers
+              </Pill>
 
-            <Divider />
-          </>
-        )}
+              <Divider />
+            </>
+          )}
 
         <Pill
           label="time mode"
@@ -189,6 +191,13 @@ function ConfigBar({ settings, onChange }) {
           ❝ quotes
         </Pill>
         <Pill
+          label="daily challenge"
+          active={settings.mode === "daily"}
+          onClick={() => set({ mode: "daily" })}
+        >
+          ◉ daily
+        </Pill>
+        <Pill
           label="custom text mode"
           active={isCustom}
           onClick={handleCustomClick}
@@ -198,7 +207,7 @@ function ConfigBar({ settings, onChange }) {
 
         <Divider />
 
-        {settings.mode !== "quote" && settings.mode !== "custom" && (
+        {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (
           <Pill
             label="word length"
             active={!!settings.wordLength && settings.wordLength !== "any"}
@@ -217,6 +226,14 @@ function ConfigBar({ settings, onChange }) {
         )}
 
         <Pill
+          label="sudden death — test ends on the first mistake"
+          active={!!settings.suddenDeath}
+          onClick={() => set({ suddenDeath: !settings.suddenDeath })}
+        >
+          ☠ sudden
+        </Pill>
+
+        <Pill
           label="fix errors before moving on"
           active={!!settings.forceCorrect}
           onClick={() => set({ forceCorrect: !settings.forceCorrect })}
@@ -224,7 +241,7 @@ function ConfigBar({ settings, onChange }) {
           ✓ fix first
         </Pill>
 
-        {settings.mode !== "quote" && settings.mode !== "custom" && (
+        {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (
           <>
             <Divider />
 

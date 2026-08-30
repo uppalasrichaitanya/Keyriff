@@ -205,6 +205,160 @@ button {
   }
 }
 
+/* ---------- starfield flair ---------- */
+
+.flair-stars {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-stars span {
+  position: absolute;
+  inset: -50%;
+  background-repeat: repeat;
+  will-change: opacity, transform;
+}
+
+.flair-stars .s1 {
+  opacity: calc(0.9 * var(--aurora-o, 1));
+  background-image:
+    radial-gradient(1.5px 1.5px at 22% 18%, var(--color-text) 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 42%, color-mix(in srgb, var(--color-accent) 80%, transparent) 50%, transparent 51%),
+    radial-gradient(1px 1px at 44% 76%, var(--color-text) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 86% 84%, color-mix(in srgb, var(--color-accent-2) 70%, transparent) 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 58%, var(--color-text) 50%, transparent 51%);
+  background-size: 460px 460px;
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+
+.flair-stars .s2 {
+  opacity: calc(0.55 * var(--aurora-o, 1));
+  background-image:
+    radial-gradient(2px 2px at 32% 62%, color-mix(in srgb, var(--color-accent) 65%, transparent) 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 12%, var(--color-text) 50%, transparent 51%),
+    radial-gradient(1px 1px at 54% 34%, var(--color-text) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 12% 88%, color-mix(in srgb, var(--color-text) 60%, transparent) 50%, transparent 51%);
+  background-size: 720px 720px;
+  animation: twinkle 7s ease-in-out infinite alternate-reverse, drift-b 90s linear infinite;
+}
+
+@keyframes twinkle {
+  from { opacity: calc(0.35 * var(--aurora-o, 1)); }
+  to { opacity: calc(0.95 * var(--aurora-o, 1)); }
+}
+
+/* ---------- gradient mesh flair ---------- */
+
+.flair-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-mesh span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: calc(0.5 * var(--aurora-o, 1));
+  will-change: transform;
+}
+
+.flair-mesh .m1 {
+  width: 55vw;
+  height: 55vw;
+  left: -12vw;
+  top: -18vh;
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  animation: drift-a 34s ease-in-out infinite alternate;
+}
+
+.flair-mesh .m2 {
+  width: 44vw;
+  height: 44vw;
+  right: -14vw;
+  top: 16vh;
+  background: color-mix(in srgb, var(--color-accent-2) 18%, transparent);
+  animation: drift-b 42s ease-in-out infinite alternate;
+}
+
+.flair-mesh .m3 {
+  width: 40vw;
+  height: 40vw;
+  left: 26vw;
+  bottom: -22vh;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  animation: drift-c 50s ease-in-out infinite alternate;
+}
+
+/* ---------- vapor grid flair ---------- */
+
+.flair-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-grid .g-floor {
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  bottom: -12%;
+  height: 46%;
+  transform: perspective(420px) rotateX(58deg);
+  transform-origin: top center;
+  opacity: calc(0.5 * var(--aurora-o, 1));
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-accent) 45%, transparent) 0 1px,
+      transparent 1px 90px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-accent) 45%, transparent) 0 1px,
+      transparent 1px 64px
+    );
+  animation: grid-scroll 3.2s linear infinite;
+  mask-image: linear-gradient(to bottom, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%);
+}
+
+.flair-grid .g-horizon {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 33%;
+  height: 2px;
+  opacity: calc(0.8 * var(--aurora-o, 1));
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent) 50%,
+    transparent
+  );
+  filter: blur(1px);
+}
+
+@keyframes grid-scroll {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 0, 0 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flair-stars span,
+  .flair-mesh span,
+  .flair-grid .g-floor {
+    animation: none;
+  }
+}
+
 /* ---------- glass panels (flair themes) ---------- */
 
 [data-flair] .glass {
@@ -678,4 +832,246 @@ button {
     transparent 65%
   );
   filter: blur(7px);
+}
+
+/* ================= keyboard styles ================= */
+
+/* ---- solid: matte PBT caps, soft moonlight ---- */
+
+[data-kb="solid"] .kb-frame {
+  border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  background: linear-gradient(180deg, var(--color-surface-hi), var(--color-surface));
+  box-shadow:
+    0 30px 60px -26px rgba(0, 0, 0, 0.75),
+    inset 0 0 44px -20px rgba(0, 0, 0, 0.85);
+}
+
+[data-kb="solid"] .kb-top {
+  border-color: color-mix(in srgb, var(--color-text) 14%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-text) 15%, var(--color-surface-hi)),
+    color-mix(in srgb, var(--color-text) 5%, var(--color-surface))
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 10%, transparent),
+    inset 0 -3px 7px -4px rgba(0, 0, 0, 0.55);
+}
+
+[data-kb="solid"] .kb-label {
+  color: color-mix(in srgb, var(--color-text) 78%, var(--color-sub));
+  text-shadow: none;
+  letter-spacing: 0.05em;
+}
+
+[data-kb="solid"] .kb-key.next .kb-top {
+  border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+}
+
+[data-kb="solid"] .kb-key.next .kb-label {
+  color: var(--color-accent);
+  text-shadow: none;
+}
+
+[data-kb="solid"] .kb-key.pressed .kb-top {
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-text) 8%, var(--color-surface)),
+    color-mix(in srgb, black 20%, var(--color-surface))
+  );
+  box-shadow: inset 0 2px 6px -2px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- retro: cream sculpted caps on a dark case ---- */
+
+[data-kb="retro"] .kb-frame {
+  border-color: #4a4034;
+  background: linear-gradient(180deg, #3a3226, #2c2519);
+  box-shadow:
+    0 30px 60px -26px rgba(0, 0, 0, 0.8),
+    inset 0 0 44px -18px rgba(0, 0, 0, 0.9);
+}
+
+[data-kb="retro"] .kb-top {
+  border-color: #b3a488;
+  background: linear-gradient(180deg, #ece3cf, #d9cdaf);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 6px -4px rgba(90, 70, 40, 0.55);
+}
+
+[data-kb="retro"] .kb-label {
+  color: #6b5d45;
+  text-shadow: none;
+}
+
+[data-kb="retro"] .kb-key.next .kb-top {
+  border-color: #a24e2c;
+}
+
+[data-kb="retro"] .kb-key.next .kb-label {
+  color: #a24e2c;
+  text-shadow: none;
+}
+
+[data-kb="retro"] .kb-key.pressed .kb-top {
+  border-color: #8a7a5e;
+  background: linear-gradient(180deg, #ddd2b8, #c6b995);
+  box-shadow: inset 0 2px 5px -2px rgba(80, 60, 30, 0.55);
+}
+
+[data-kb="retro"] .kb-corner.tl,
+[data-kb="retro"] .kb-corner.br {
+  border-color: rgba(236, 227, 207, 0.5) !important;
+}
+
+/* ---- terminal: flat sharp grid, phosphor vibe ---- */
+
+[data-kb="terminal"] .kb-frame {
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--color-text) 22%, transparent);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      color-mix(in srgb, var(--color-text) 2%, transparent) 3px 4px
+    ),
+    var(--color-base);
+  box-shadow: 0 24px 50px -26px rgba(0, 0, 0, 0.8);
+}
+
+[data-kb="terminal"] .kb-top {
+  border-radius: 3px;
+  border-color: color-mix(in srgb, var(--color-text) 26%, transparent);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-kb="terminal"] .kb-label {
+  color: color-mix(in srgb, var(--color-text) 70%, var(--color-sub));
+  text-shadow: none;
+  letter-spacing: 0.12em;
+}
+
+[data-kb="terminal"] .kb-key.next .kb-top {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+[data-kb="terminal"] .kb-key.next .kb-label {
+  color: var(--color-accent);
+  text-shadow: none;
+}
+
+[data-kb="terminal"] .kb-key.pressed .kb-top {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+[data-kb="terminal"] .kb-key.pressed .kb-label {
+  color: var(--color-base);
+  text-shadow: none;
+}
+
+/* ---- low profile: chiclet, minimal travel ---- */
+
+[data-kb="low"] .kb-board {
+  transform: rotateX(11deg);
+}
+
+[data-kb="low"] .kb-frame {
+  border-radius: 12px;
+  padding: 9px;
+  border-color: color-mix(in srgb, var(--color-accent) 26%, transparent);
+  background: linear-gradient(180deg, var(--color-surface-hi), var(--color-surface));
+  box-shadow:
+    0 22px 44px -24px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px -16px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+[data-kb="low"] .kb-top {
+  border-radius: 12px;
+  transform: translateZ(8px);
+  border-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-hi)),
+    var(--color-surface)
+  );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 7%, transparent);
+}
+
+[data-kb="low"] .kb-wf,
+[data-kb="low"] .kb-wl,
+[data-kb="low"] .kb-wr {
+  display: none;
+}
+
+[data-kb="low"] .kb-box::before {
+  display: none;
+}
+
+[data-kb="low"] .kb-key.pressed .kb-box {
+  transform: translateZ(-5px);
+}
+
+[data-kb="low"] .kb-key.pressed .kb-top {
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface));
+}
+
+/* ---- gummy: squishy candy caps ---- */
+
+[data-kb="gummy"] .kb-top {
+  border-radius: 14px;
+  border-color: transparent;
+  background:
+    radial-gradient(
+      120% 90% at 30% 12%,
+      color-mix(in srgb, white 26%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--color-accent-2) 55%, var(--color-surface-hi)),
+      color-mix(in srgb, var(--color-accent) 38%, var(--color-surface))
+    );
+  box-shadow:
+    inset 0 -4px 8px -4px rgba(0, 0, 0, 0.4),
+    0 0 14px -5px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+[data-kb="gummy"] .kb-label {
+  color: color-mix(in srgb, var(--color-base) 78%, var(--color-text));
+  text-shadow: none;
+  font-weight: 700;
+}
+
+[data-kb="gummy"] .kb-key.next .kb-top {
+  border-color: color-mix(in srgb, white 35%, transparent);
+}
+
+[data-kb="gummy"] .kb-key.next .kb-label {
+  color: var(--color-base);
+  text-shadow: none;
+}
+
+[data-kb="gummy"] .kb-key.pressed .kb-box {
+  transform: translateZ(-14px) scale(0.965);
+}
+
+[data-kb="gummy"] .kb-key.pressed .kb-top {
+  border-color: transparent;
+  background:
+    radial-gradient(
+      120% 90% at 30% 12%,
+      color-mix(in srgb, white 14%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--color-accent-2) 42%, var(--color-surface)),
+      color-mix(in srgb, var(--color-accent) 28%, var(--color-surface))
+    );
+  box-shadow: inset 0 -2px 6px -3px rgba(0, 0, 0, 0.45);
 }

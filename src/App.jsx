@@ -10,7 +10,8 @@ import StatsPage from "./components/StatsPage"
 import Keyboard from "./components/Keyboard"
 import Footer from "./components/Footer"
 import TouchInput from "./components/TouchInput"
-import { isTouchDevice } from "./lib/touch"
+import KbStylePicker from "./components/KbStylePicker"
+import { isTouchDevice, buzz } from "./lib/touch"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { useTypingEngine } from "./hooks/useTypingEngine"
 import { applyTheme, getTheme } from "./lib/themes"
@@ -43,6 +44,8 @@ const DEFAULT_SETTINGS = {
   forceCorrect: false,
   wordLength: "any",
   fontSize: "m",
+  kbStyle: "laser",
+  suddenDeath: false,
 }
 
 function RestartIcon() {
@@ -113,6 +116,10 @@ export default function App() {
   }, [themeId])
 
   useEffect(() => {
+    document.documentElement.dataset.kb = settings.kbStyle ?? "laser"
+  }, [settings.kbStyle])
+
+  useEffect(() => {
     setSoundEnabled(settings.sound)
   }, [settings.sound])
 
@@ -138,10 +145,19 @@ export default function App() {
   const engine = useTypingEngine(settings, {
     onChar: (ch) => {
       if (!settings.sound) return
+      buzz(4)
       playKey({ row: rowOfChar(ch) })
     },
-    onSpace: () => settings.sound && playSpace(),
-    onError: () => settings.sound && playError(),
+    onSpace: () => {
+      if (!settings.sound) return
+      buzz(4)
+      playSpace()
+    },
+    onError: () => {
+      if (!settings.sound) return
+      buzz([8, 20, 8])
+      playError()
+    },
     onFinish: (result) => {
       const existing = pbsRef.current[result.key]
       const isPb = !existing || result.wpm > existing.wpm
@@ -353,10 +369,33 @@ export default function App() {
       <div className="flex min-h-full flex-col">
         <h1 className="sr-only">typer — typing trainer</h1>
       {theme.flair && (
-        <div className="aurora" aria-hidden>
-          <span className="a1" />
-          <span className="a2" />
-          <span className="a3" />
+        <div className={theme.flair === "aurora" ? "aurora" : `flair-${theme.flair}`} aria-hidden>
+          {theme.flair === "aurora" && (
+            <>
+              <span className="a1" />
+              <span className="a2" />
+              <span className="a3" />
+            </>
+          )}
+          {theme.flair === "stars" && (
+            <>
+              <span className="s1" />
+              <span className="s2" />
+            </>
+          )}
+          {theme.flair === "mesh" && (
+            <>
+              <span className="m1" />
+              <span className="m2" />
+              <span className="m3" />
+            </>
+          )}
+          {theme.flair === "grid" && (
+            <>
+              <span className="g-floor" />
+              <span className="g-horizon" />
+            </>
+          )}
         </div>
       )}
       <div className="vignette" aria-hidden />
@@ -458,6 +497,10 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="mt-3 flex justify-end gap-1">
+                    <KbStylePicker
+                      value={settings.kbStyle ?? "laser"}
+                      onChange={(id) => setSettings((s) => ({ ...s, kbStyle: id }))}
+                    />
                     <motion.button
                       whileTap={{ scale: 0.88 }}
                       onMouseDown={(e) => e.preventDefault()}

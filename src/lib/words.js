@@ -118,6 +118,31 @@ function rand(n) {
   return a[0] % n
 }
 
+/* deterministic PRNG for the daily challenge */
+export function mulberry32(seed) {
+  let s = seed >>> 0
+  return function () {
+    s |= 0
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function sampleFrom(pool, n, rng) {
+  const out = []
+  const recent = []
+  while (out.length < n) {
+    const w = pool[Math.floor(rng() * pool.length)]
+    if (recent.includes(w)) continue
+    out.push(w)
+    recent.push(w)
+    if (recent.length > 14) recent.shift()
+  }
+  return out
+}
+
 export function sampleWords(n, { min = 0, max = Infinity } = {}) {
   const pool =
     min > 0 || max < Infinity
@@ -133,4 +158,12 @@ export function sampleWords(n, { min = 0, max = Infinity } = {}) {
     if (recent.length > 14) recent.shift()
   }
   return out
+}
+
+export function sampleWordsSeeded(n, seed, { min = 0, max = Infinity } = {}) {
+  const pool =
+    min > 0 || max < Infinity
+      ? WORDS.filter((w) => w.length >= min && w.length <= max)
+      : WORDS
+  return sampleFrom(pool, n, mulberry32(seed))
 }

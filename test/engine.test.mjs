@@ -9,8 +9,11 @@ import {
   formatMode,
   weakKeys,
   sampleWeakWords,
+  dailySeed,
+  dateKey,
+  isTimedMode,
 } from "../src/lib/engine.js"
-import { sampleWords, WORDS } from "../src/lib/words.js"
+import { sampleWords, sampleWordsSeeded, WORDS } from "../src/lib/words.js"
 import { QUOTES, sampleQuote } from "../src/lib/quotes.js"
 import { charForCode, targetsFor } from "../src/lib/keys.js"
 
@@ -151,5 +154,42 @@ describe("typing engine", () => {
     expect(charForCode("Space")).toBe(" ")
     expect(charForCode("Minus")).toBe("-")
     expect(charForCode("Escape")).toBe(null)
+  })
+
+  test("sampleWordsSeeded is deterministic per seed", () => {
+    const a = sampleWordsSeeded(30, 12345)
+    const b = sampleWordsSeeded(30, 12345)
+    const c = sampleWordsSeeded(30, 54321)
+    expect(a).toEqual(b)
+    expect(a).not.toEqual(c)
+    expect(a.every((w) => WORDS.includes(w))).toBe(true)
+  })
+
+  test("dailySeed is stable within a day and differs across days", () => {
+    const d1 = new Date(2026, 7, 31)
+    const d2 = new Date(2026, 7, 31, 23, 59)
+    const d3 = new Date(2026, 8, 1)
+    expect(dailySeed(d1)).toBe(dailySeed(d2))
+    expect(dailySeed(d1)).not.toBe(dailySeed(d3))
+  })
+
+  test("daily mode generates a deterministic punctuated test", () => {
+    const t1 = generateTest({ mode: "daily", timeValue: 30 })
+    const t2 = generateTest({ mode: "daily", timeValue: 30 })
+    expect(t1).toEqual(t2)
+    expect(t1.length).toBe(120)
+    expect(t1.some((w) => /[.!?';,]/.test(w) || w[0] !== w[0].toLowerCase())).toBe(true)
+  })
+
+  test("pbKey and formatMode for daily mode use today's date", () => {
+    const s = { mode: "daily", timeValue: 30 }
+    expect(pbKey(s, 120)).toBe(`daily-${dateKey()}`)
+    expect(formatMode(s, 120)).toBe(`daily challenge · ${dateKey()}`)
+  })
+
+  test("isTimedMode covers time and daily", () => {
+    expect(isTimedMode("time")).toBe(true)
+    expect(isTimedMode("daily")).toBe(true)
+    expect(isTimedMode("words")).toBe(false)
   })
 })

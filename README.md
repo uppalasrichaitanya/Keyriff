@@ -4,9 +4,11 @@ A beautiful, local-first typing trainer. Everything runs and stays in your brows
 
 ## Features
 
-- **Modes** — time (15/30/60/120s), words (10/25/50/100), quotes, custom text, and a **weak-key practice drill** built from your own mistake stats
-- **Modifiers** — punctuation, numbers, word-length tiers (short/any/long), force-correct mode (fix errors before advancing)
-- **Live feedback** — WPM/accuracy, sparkline, correct-streak with milestone sounds, countdown ticks, live WPM in the tab title
+- **Modes** — time (15/30/60/120s), words (10/25/50/100), quotes, custom text, a **weak-key practice drill** built from your own mistake stats, and a **daily challenge**: the same seeded test for everyone each day
+- **Modifiers** — punctuation, numbers, word-length tiers (short/any/long), force-correct mode, and **sudden death** (one mistake ends the test)
+- **6 keyboard styles** — laser, solid, retro, terminal, low profile, and gummy — pairable with any of the **7 sound packs**
+- **33 themes** — including animated flair types: aurora, **starfield**, **gradient mesh**, and a **vapor grid horizon**
+- **Live feedback** — WPM/accuracy, sparkline, correct-streak with milestone sounds, countdown ticks, red-line final-seconds progress, live WPM in the tab title
 - **Results** — count-up stats, WPM-over-time chart with error markers and a PB reference line, keyboard **replay** of your exact keystrokes (seek + speed), shareable result card (copy image or save PNG), confetti on personal bests
 - **3D keyboard** — physical key highlighting, parallax tilt, weak-key heat map, error pulse, auto-scales from desktop down to phones
 - **Sound engine** — 7 synthetic switch packs (tactile, topre, bubble, thock, clicky, typewriter, linear) via Web Audio, with per-row depth

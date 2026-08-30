@@ -8,6 +8,7 @@ import {
   formatMode,
   pbKey,
   wordLenOpts,
+  isTimedMode,
 } from "../lib/engine"
 import { sampleWords } from "../lib/words"
 
@@ -125,7 +126,7 @@ export function useTypingEngine(settings, handlers = {}) {
     const ms = performance.now() - startRef.current
     const meta = metaRef.current
     const timeSec =
-      s.mode === "time"
+      isTimedMode(s.mode)
         ? s.timeValue
         : meta?.durationSec ?? Math.max(1, ms / 1000)
     const minutes = timeSec / 60
@@ -175,7 +176,7 @@ export function useTypingEngine(settings, handlers = {}) {
       clockRef.subs.forEach((cb) => cb())
       pushSnapshots(el)
       const limitMs =
-        s.mode === "time"
+        isTimedMode(s.mode)
           ? s.timeValue * 1000
           : metaRef.current?.durationSec != null
             ? metaRef.current.durationSec * 1000
@@ -211,6 +212,13 @@ export function useTypingEngine(settings, handlers = {}) {
       setErrorTick((t) => t + 1)
       handlersRef.current?.onError?.()
       logEvent("i", ch)
+      const dead = settingsRef.current.suddenDeath
+      const next = arr.slice()
+      next[wi] = cur + ch
+      commit(next)
+      syncStats()
+      if (dead) finish()
+      return
     } else if (ch === target[cur.length]) {
       countersRef.current.correct++
       handlersRef.current?.onChar?.(ch)
@@ -220,6 +228,13 @@ export function useTypingEngine(settings, handlers = {}) {
       setErrorTick((t) => t + 1)
       handlersRef.current?.onError?.()
       logEvent("i", ch)
+      const dead = settingsRef.current.suddenDeath
+      const next = arr.slice()
+      next[wi] = cur + ch
+      commit(next)
+      syncStats()
+      if (dead) finish()
+      return
     }
     const next = arr.slice()
     next[wi] = cur + ch
@@ -227,20 +242,21 @@ export function useTypingEngine(settings, handlers = {}) {
     syncStats()
   }
 
-  function extendIfNeeded(wi) {
+    function extendIfNeeded(wi) {
     const s = settingsRef.current
-    if (s.mode !== "time" && !metaRef.current?.generate) return
-    if (wi > wordsRef.current.length - 20) {
-      const gen = metaRef.current?.generate
-      let more
-      if (gen) {
-        more = gen(30)
-      } else {
-        more = sampleWords(30, wordLenOpts(s.wordLength))
-        if (s.numbers) more = applyNumbers(more)
-        if (s.punctuation) more = applyPunctuation(more)
+    if (isTimedMode(s.mode) || metaRef.current?.generate) {
+      if (wi > wordsRef.current.length - 20) {
+        const gen = metaRef.current?.generate
+        let more
+        if (gen) {
+          more = gen(30)
+        } else {
+          more = sampleWords(30, wordLenOpts(s.wordLength))
+          if (s.numbers) more = applyNumbers(more)
+          if (s.punctuation) more = applyPunctuation(more)
+        }
+        setWords((prev) => prev.concat(more))
       }
-      setWords((prev) => prev.concat(more))
     }
   }
 

@@ -104,6 +104,22 @@ describe("App", () => {
     await screen.findByText("results", {}, { timeout: 4000 })
   })
 
+  test("sudden death ends the test on the first mistake", async () => {
+    seed({ ...WORDS3, suddenDeath: true })
+    render(<App />)
+    const w = testWords()[0]
+    const wrong = w[0] === "q" ? "r" : "q"
+    await typeText(wrong)
+    await screen.findByText("results", {}, { timeout: 4000 })
+  })
+
+  test("daily mode shows the countdown ghost", () => {
+    seed({ ...BASE_SETTINGS, mode: "daily", timeValue: 30 })
+    render(<App />)
+    /* the idle ghost number shows the test duration */
+    expect(screen.getByText("30")).toBeInTheDocument()
+  })
+
   test("regenerates words when a setting changes", () => {
     seed(BASE_SETTINGS)
     render(<App />)

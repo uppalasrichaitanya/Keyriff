@@ -99,19 +99,22 @@ function LiveStats({
     return s
   }, [typed, words])
 
-  const durMs = settings.mode === "time" ? settings.timeValue * 1000 : null
+  const durMs =
+    settings.mode === "time" || settings.mode === "daily"
+      ? settings.timeValue * 1000
+      : null
   const timeLeft =
     durMs != null
       ? Math.max(0, Math.ceil((durMs - elapsed) / 1000))
       : null
   const wordsLeft =
-    settings.mode !== "time"
+    settings.mode !== "time" && settings.mode !== "daily"
       ? Math.max(0, words.length - (typed.length - 1))
       : null
   const big =
     status === "idle"
       ? null
-      : settings.mode === "time"
+      : timeLeft != null
         ? timeLeft
         : wordsLeft
 
@@ -181,7 +184,7 @@ function LiveStats({
             exit={{ opacity: 0 }}
             className="text-4xl font-extrabold tabular-nums text-sub/40 sm:text-5xl"
           >
-            {settings.mode === "time"
+            {settings.mode === "time" || settings.mode === "daily"
               ? settings.timeValue
               : settings.mode === "quote" || settings.mode === "custom"
                 ? words.length

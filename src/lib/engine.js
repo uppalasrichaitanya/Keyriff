@@ -1,6 +1,24 @@
-import { sampleWords, WORDS } from "./words.js"
+import { sampleWords, sampleWordsSeeded, mulberry32, WORDS } from "./words.js"
 import { sampleQuote } from "./quotes.js"
 import { charForCode } from "./keys.js"
+
+export function dateKey(d = new Date()) {
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+}
+
+export function dailySeed(d = new Date()) {
+  const key = dateKey(d)
+  let h = 2166136261
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+export function isTimedMode(mode) {
+  return mode === "time" || mode === "daily"
+}
 
 export function wordLenOpts(wordLength) {
   if (wordLength === "short") return { max: 4 }
@@ -17,6 +35,11 @@ export function generateTest(settings) {
     const t = (settings.customText || "").trim()
     if (t) return t.split(/\s+/)
   }
+  if (mode === "daily") {
+    /* deterministic test of the day — same words for everyone, always punctuated */
+    const rng = mulberry32(dailySeed())
+    return applyPunctuation(sampleWordsSeeded(120, dailySeed()), rng)
+  }
   const count =
     mode === "time" ? Math.max(50, timeValue * 4) : wordValue
   let words = sampleWords(count, wordLenOpts(wordLength))
@@ -25,29 +48,29 @@ export function generateTest(settings) {
   return words
 }
 
-function randomDigits() {
-  const len = 2 + ((Math.random() * 3) | 0)
+function randomDigits(rng) {
+  const len = 2 + ((rng() * 3) | 0)
   let s = ""
-  for (let i = 0; i < len; i++) s += (Math.random() * 10) | 0
+  for (let i = 0; i < len; i++) s += (rng() * 10) | 0
   return s
 }
 
-export function applyNumbers(words) {
+export function applyNumbers(words, rng = Math.random) {
   return words.map((w, i) =>
-    i > 0 && Math.random() < 0.14 ? randomDigits() : w
+    i > 0 && rng() < 0.14 ? randomDigits(rng) : w
   )
 }
 
-export function applyPunctuation(words) {
+export function applyPunctuation(words, rng = Math.random) {
   const out = []
-  let sinceStop = 2 + ((Math.random() * 5) | 0)
+  let sinceStop = 2 + ((rng() * 5) | 0)
   for (let i = 0; i < words.length; i++) {
     let w = words[i]
     if (sinceStop <= 0) {
-      w = capitalize(w) + sentenceEnd()
-      sinceStop = 3 + ((Math.random() * 6) | 0)
+      w = capitalize(w) + sentenceEnd(rng)
+      sinceStop = 3 + ((rng() * 6) | 0)
     } else {
-      const roll = Math.random()
+      const roll = rng()
       if (roll < 0.1) {
         w = capitalize(w)
       } else if (roll < 0.18 && i < words.length - 1 && sinceStop > 2) {
@@ -70,8 +93,8 @@ function capitalize(w) {
   return w[0].toUpperCase() + w.slice(1)
 }
 
-function sentenceEnd() {
-  const r = Math.random()
+function sentenceEnd(rng) {
+  const r = rng()
   if (r < 0.7) return "."
   if (r < 0.85) return "?"
   return "!"
@@ -143,6 +166,9 @@ export function pbKey(settings, wordCount) {
     const bucket = wordCount < 18 ? "short" : wordCount < 32 ? "medium" : "long"
     return `custom-${bucket}`
   }
+  if (settings.mode === "daily") {
+    return `daily-${dateKey()}`
+  }
   const base =
     settings.mode === "time"
       ? `time-${settings.timeValue}`
@@ -160,6 +186,9 @@ export function formatMode(settings, wordCount) {
   }
   if (settings.mode === "custom") {
     return `custom · ${wordCount ?? "?"} words`
+  }
+  if (settings.mode === "daily") {
+    return `daily challenge · ${dateKey()}`
   }
   const base =
     settings.mode === "time"

@@ -160,6 +160,43 @@ try {
       })
       qa.light = light
       await page.screenshot({ path: path.join(SHOTS, "desktop-light.png") })
+
+      /* keyboard styles + flair themes */
+      for (const style of ["solid", "retro", "terminal", "low", "gummy"]) {
+        await page.evaluate((s) => {
+          localStorage.setItem(
+            "typer:v2:settings",
+            JSON.stringify({
+              mode: "time", timeValue: 30, wordValue: 25,
+              punctuation: false, numbers: false, sound: false,
+              volume: 85, pack: "tactile", customText: "",
+              showHeat: false, forceCorrect: false,
+              wordLength: "any", fontSize: "m",
+              suddenDeath: false, kbStyle: s,
+            })
+          )
+        }, style)
+        await page.reload({ waitUntil: "networkidle0", timeout: 30000 })
+        await sleep(900)
+        const kbAttr = await page.evaluate(
+          () => document.documentElement.dataset.kb
+        )
+        await page.screenshot({ path: path.join(SHOTS, `desktop-kb-${style}.png`) })
+        qa[`kb_${style}`] = kbAttr
+      }
+      for (const theme of ["starlight", "vaporgrid"]) {
+        await page.evaluate((t) => {
+          localStorage.setItem("typer:v2:theme", JSON.stringify(t))
+        }, theme)
+        await page.reload({ waitUntil: "networkidle0", timeout: 30000 })
+        await sleep(1200)
+        const flair = await page.evaluate(() => {
+          const el = document.querySelector("[class*='flair-']")
+          return el ? el.className.split(" ")[0] : null
+        })
+        await page.screenshot({ path: path.join(SHOTS, `desktop-${theme}.png`) })
+        qa[`flair_${theme}`] = flair
+      }
     }
 
     log(`${vp.name}: overflow=${over}, qa=${JSON.stringify(qa)}, errors=${errors.length}`)
@@ -193,9 +230,19 @@ const lightFailed = results.some(
     v.qa?.light &&
     (v.qa.light.scheme !== "light" || v.qa.light.vignetteBg !== "none")
 )
+const styleFailed = results.some((v) => {
+  if (!v.qa) return false
+  for (const style of ["solid", "retro", "terminal", "low", "gummy"]) {
+    if (v.qa[`kb_${style}`] !== style) return true
+  }
+  if (v.qa.flair_starlight !== "flair-stars") return true
+  if (v.qa.flair_vaporgrid !== "flair-grid") return true
+  return false
+})
 failed =
   failed ||
   qaFailed ||
   lightFailed ||
+  styleFailed ||
   results.some((v) => v.horizontalOverflow > 1 || v.errors.length > 0)
 process.exitCode = failed ? 1 : 0

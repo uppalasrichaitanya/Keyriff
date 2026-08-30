@@ -1,16 +1,40 @@
-# React + Vite
+# typer
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A beautiful, local-first typing trainer. Everything runs and stays in your browser — no accounts, no tracking, no network.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Modes** — time (15/30/60/120s), words (10/25/50/100), quotes, custom text, and a **weak-key practice drill** built from your own mistake stats
+- **Modifiers** — punctuation, numbers, word-length tiers (short/any/long), force-correct mode (fix errors before advancing)
+- **Live feedback** — WPM/accuracy, sparkline, correct-streak with milestone sounds, countdown ticks, live WPM in the tab title
+- **Results** — count-up stats, WPM-over-time chart with error markers and a PB reference line, keyboard **replay** of your exact keystrokes (seek + speed), shareable result card (copy image or save PNG), confetti on personal bests
+- **3D keyboard** — physical key highlighting, parallax tilt, weak-key heat map, error pulse, auto-scales from desktop down to phones
+- **Sound engine** — 7 synthetic switch packs (tactile, topre, bubble, thock, clicky, typewriter, linear) via Web Audio, with per-row depth
+- **25 themes** — with premium flair variants (aurora, glass, gradient text), light and dark
+- **Stats page** — totals, today card, day streak, WPM progression chart, weak keys, personal bests, recent tests, plus export/import/reset of all your data
+- **Mobile & PWA** — touch input with "tap to type", installable, fully offline (fonts precached), safe-area aware
+- **Zen mode**, first-visit onboarding, reduced-motion support, screen-reader live regions
 
-## React Compiler
+## Controls
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Key | Action |
+| --- | --- |
+| `tab` | restart test |
+| `esc` | back / exit zen |
+| `enter` | new test (on results) |
 
-## Expanding the Oxlint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+npm run dev        # vite dev server
+npm run lint       # oxlint
+npm test           # vitest (engine + component tests)
+npm run e2e        # builds, serves, and runs the Chrome viewport matrix
+npm run build      # production build + PWA service worker
+npm run icons      # regenerate PWA icons from the logo design
+```
+
+## Stack
+
+Vite · React 19 · Tailwind CSS 4 · Framer Motion · Web Audio API · vite-plugin-pwa · vitest + Testing Library · puppeteer-core (e2e)

@@ -65,7 +65,7 @@ function Card({ label, value, sub }) {
       <span className="text-[10px] font-semibold uppercase tracking-wider text-sub">
         {label}
       </span>
-      <span className="mt-1 truncate text-2xl font-bold tabular-nums text-text">
+      <span className="mt-1 truncate text-xl font-bold tabular-nums text-text sm:text-2xl">
         {value}
       </span>
       {sub && <span className="mt-0.5 truncate text-xs text-sub">{sub}</span>}
@@ -206,7 +206,7 @@ export default function StatsPage({
           onClick={onBack}
           aria-label="back to test"
           title="back (esc)"
-          className="rounded-lg p-2 text-sub transition-colors duration-150 hover:bg-surface hover:text-text"
+          className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:bg-surface hover:text-text"
         >
           <BackIcon />
         </motion.button>

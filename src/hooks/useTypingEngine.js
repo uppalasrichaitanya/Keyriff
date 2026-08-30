@@ -7,6 +7,7 @@ import {
   computeMissed,
   formatMode,
   pbKey,
+  wordLenOpts,
 } from "../lib/engine"
 import { sampleWords } from "../lib/words"
 
@@ -122,6 +123,7 @@ export function useTypingEngine(settings, handlers = {}) {
 
     const s = settingsRef.current
     const ms = performance.now() - startRef.current
+    const meta = metaRef.current
     const timeSec =
       s.mode === "time"
         ? s.timeValue
@@ -129,7 +131,6 @@ export function useTypingEngine(settings, handlers = {}) {
     const minutes = timeSec / 60
     const c = { ...countersRef.current }
     const totalTyped = c.correct + c.incorrect + c.extra
-    const meta = metaRef.current
 
     const result = {
       wpm: Math.round((totalTyped > 0 ? c.correct / 5 / minutes : 0) * 10) / 10,
@@ -235,7 +236,7 @@ export function useTypingEngine(settings, handlers = {}) {
       if (gen) {
         more = gen(30)
       } else {
-        more = sampleWords(30)
+        more = sampleWords(30, wordLenOpts(s.wordLength))
         if (s.numbers) more = applyNumbers(more)
         if (s.punctuation) more = applyPunctuation(more)
       }

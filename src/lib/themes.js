@@ -393,6 +393,7 @@ export function applyTheme(id) {
     theme.auroraO != null ? String(theme.auroraO) : "1"
   )
   root.style.colorScheme = LIGHT_THEMES.has(theme.id) ? "light" : "dark"
+  root.dataset.scheme = LIGHT_THEMES.has(theme.id) ? "light" : "dark"
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.setAttribute("content", theme.base)
 }

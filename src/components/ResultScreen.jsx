@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useCountUp } from "../hooks/useCountUp"
 import WpmChart from "./WpmChart"
 import TypingReplay from "./TypingReplay"
+import { renderShareCard } from "../lib/shareCard"
 
 const container = {
   hidden: {},
@@ -31,7 +32,7 @@ function BigStat({ value, decimals = 0, suffix = "", label, accent }) {
   return (
     <div>
       <div
-        className={`text-6xl font-bold tabular-nums ${
+        className={`text-5xl font-extrabold tabular-nums sm:text-6xl ${
           accent ? "grad-text" : "text-text"
         }`}
       >
@@ -107,6 +108,7 @@ export default function ResultScreen({ result, onNext }) {
   const consistency = useCountUp(result.consistency)
   const raw = useCountUp(result.rawWpm)
   const [copied, setCopied] = useState(false)
+  const [shared, setShared] = useState(null)
 
   const { correct, incorrect, extra, missed } = result.chars
 
@@ -116,6 +118,29 @@ export default function ResultScreen({ result, onNext }) {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 1600)
+    } catch {}
+  }
+
+  async function shareResult() {
+    try {
+      const { dataUrl, blob } = await renderShareCard(result)
+      let ok = false
+      try {
+        if (window.ClipboardItem && navigator.clipboard?.write) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ])
+          ok = true
+        }
+      } catch {}
+      if (!ok) {
+        const a = document.createElement("a")
+        a.href = dataUrl
+        a.download = `typer-${Math.round(result.wpm)}wpm.png`
+        a.click()
+      }
+      setShared(ok ? "copied!" : "saved!")
+      setTimeout(() => setShared(null), 1600)
     } catch {}
   }
 
@@ -130,7 +155,7 @@ export default function ResultScreen({ result, onNext }) {
       {result.isPb && <Confetti />}
       <motion.div
         variants={item}
-        className="flex items-center justify-between"
+        className="flex flex-wrap items-center justify-between gap-2"
         aria-live="polite"
       >
         <div className="flex items-center gap-3">
@@ -172,13 +197,26 @@ export default function ResultScreen({ result, onNext }) {
 
       <motion.div
         variants={item}
-        className="glass flex flex-wrap items-start justify-between gap-8 rounded-2xl bg-surface px-7 py-6"
+        className="glass relative flex flex-wrap items-start justify-between gap-8 overflow-hidden rounded-2xl bg-surface px-7 py-6"
       >
-        <div className="flex gap-10">
+        {result.isPb && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(340px 180px at 20% 55%, color-mix(in srgb, var(--color-accent) 30%, transparent), transparent 72%)",
+            }}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: [0, 0.9, 0], scale: [0.7, 1.15, 1.35] }}
+            transition={{ duration: 1.5, ease: "easeOut", delay: 0.35 }}
+          />
+        )}
+        <div className="relative flex gap-6 sm:gap-10">
           <BigStat value={result.wpm} label="wpm" accent />
           <BigStat value={result.accuracy} decimals={1} suffix="%" label="accuracy" />
         </div>
-        <div className="flex min-w-56 flex-col gap-1.5">
+        <div className="relative flex min-w-56 flex-col gap-1.5">
           <SmallStat label="raw">{raw}</SmallStat>
           <SmallStat label="consistency">{consistency}%</SmallStat>
           <SmallStat label="time">{result.timeSec}s</SmallStat>
@@ -213,7 +251,10 @@ export default function ResultScreen({ result, onNext }) {
         />
       </motion.div>
 
-      <motion.div variants={item} className="flex items-center justify-end gap-4">
+      <motion.div
+        variants={item}
+        className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4"
+      >
         <span className="hidden items-center gap-1.5 text-xs text-sub sm:flex">
           press
           <kbd className="rounded border-b-2 border-black/30 bg-surface px-1.5 py-0.5 font-mono">
@@ -225,7 +266,7 @@ export default function ResultScreen({ result, onNext }) {
           whileTap={{ scale: 0.95 }}
           onClick={copyResult}
           title="copy result to clipboard"
-          className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors duration-150 ${
+          className={`flex items-center justify-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors duration-150 sm:justify-start ${
             copied
               ? "border-accent/40 bg-accent/10 text-accent"
               : "border-sub/30 text-sub hover:border-text/40 hover:text-text"
@@ -245,8 +286,25 @@ export default function ResultScreen({ result, onNext }) {
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.95 }}
+          onClick={shareResult}
+          title="save a shareable image of this result"
+          className={`flex items-center justify-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors duration-150 sm:justify-start ${
+            shared
+              ? "border-accent/40 bg-accent/10 text-accent"
+              : "border-sub/30 text-sub hover:border-text/40 hover:text-text"
+          }`}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+          {shared ?? "share"}
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={onNext}
-          className="grad-accent shadow-accent shadow-accent-hover rounded-lg px-6 py-2.5 font-bold text-[color:var(--color-base)] transition-shadow duration-150"
+          className="grad-accent shadow-accent shadow-accent-hover w-full rounded-lg px-6 py-2.5 font-bold text-[color:var(--color-base)] transition-shadow duration-150 sm:w-auto"
         >
           next test
         </motion.button>

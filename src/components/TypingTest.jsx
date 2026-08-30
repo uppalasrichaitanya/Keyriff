@@ -11,6 +11,59 @@ function LockIcon() {
   )
 }
 
+const SIZE_CLASSES = {
+  s: {
+    zen: "text-[1.5rem] leading-[3rem] sm:text-[1.7rem] sm:leading-[3.4rem]",
+    test: "text-[1.1rem] leading-[2.2rem] sm:text-[1.3rem] sm:leading-[2.6rem]",
+  },
+  m: {
+    zen: "text-[1.7rem] leading-[3.4rem] sm:text-[2rem] sm:leading-[4rem] md:text-[2.25rem]",
+    test: "text-[1.3rem] leading-[2.6rem] sm:text-[1.55rem] sm:leading-[3rem] md:text-[1.7rem]",
+  },
+  l: {
+    zen: "text-[2.1rem] leading-[4.2rem] sm:text-[2.4rem] sm:leading-[4.8rem]",
+    test: "text-[1.6rem] leading-[3.2rem] sm:text-[1.9rem] sm:leading-[3.8rem]",
+  },
+}
+
+/* one word row — memoized so a keystroke only re-renders the
+   words whose typed content actually changed */
+const Word = memo(function Word({ w, input }) {
+  return (
+    <span
+      className={`relative whitespace-nowrap ${
+        input === undefined ? "text-sub" : ""
+      }`}
+    >
+      {w.split("").map((ch, ci) => {
+        const t = input?.[ci]
+        const cls =
+          t === undefined
+            ? "text-sub"
+            : t === ch
+              ? "text-text"
+              : "text-error"
+        return (
+          <span key={ci} data-ci={ci} className="inline-block align-top">
+            <span className={cls}>{ch}</span>
+          </span>
+        )
+      })}
+      {input != null &&
+        input.length > w.length &&
+        input.slice(w.length).split("").map((ch, i) => (
+          <span
+            key={`x${i}`}
+            data-ci={w.length + i}
+            className="inline-block align-top text-error-extra"
+          >
+            {ch}
+          </span>
+        ))}
+    </span>
+  )
+})
+
 function TypingTest({
   words,
   typed,
@@ -20,9 +73,9 @@ function TypingTest({
   blurred,
   onFocusRequest,
   zen = false,
+  fontSize = "m",
 }) {
   const wordsBoxRef = useRef(null)
-  const wordElsRef = useRef([])
   const typingTimeoutRef = useRef(0)
   const caretInnerRef = useRef(null)
   const startedRef = useRef(false)
@@ -35,9 +88,17 @@ function TypingTest({
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
 
+  /* word rows are direct children of the box, in order — no per-word
+     refs needed to locate them */
+  function wordElAt(i) {
+    const box = wordsBoxRef.current
+    const el = box?.childNodes[i]
+    return el instanceof Element ? el : null
+  }
+
   useLayoutEffect(() => {
     const box = wordsBoxRef.current
-    const wordEl = wordElsRef.current[wordIndex]
+    const wordEl = wordElAt(wordIndex)
     if (!box || !wordEl) return
 
     const pos = currentInput.length
@@ -74,7 +135,7 @@ function TypingTest({
 
   useEffect(() => {
     if (errorTick === 0) return
-    wordElsRef.current[typed.length - 1]?.animate(
+    wordElAt(typed.length - 1)?.animate(
       [
         { transform: "translateX(0)" },
         { transform: "translateX(-3px)" },
@@ -89,7 +150,7 @@ function TypingTest({
   useEffect(() => {
     const wi = typed.length - 1
     if (wi > prevWordIndexRef.current && status === "running") {
-      const el = wordElsRef.current[wi - 1]
+      const el = wordElAt(wi - 1)
       if (el) {
         el.style.transformOrigin = "left center"
         el.animate(
@@ -145,7 +206,7 @@ function TypingTest({
 
       <div
         className={`relative cursor-pointer overflow-hidden ${
-          zen ? "h-52" : "h-36"
+          zen ? "h-44 sm:h-52" : "h-32 sm:h-36"
         }`}
         onClick={onFocusRequest}
       >
@@ -154,49 +215,12 @@ function TypingTest({
           animate={{ y: scrollY }}
           transition={{ type: "spring", stiffness: 380, damping: 38 }}
           className={`relative flex flex-wrap content-start gap-x-[1.15ch] will-change-transform ${
-            zen
-              ? "text-[2rem] leading-[4rem] md:text-[2.25rem]"
-              : "text-[1.55rem] leading-[3rem] md:text-[1.7rem]"
+            (SIZE_CLASSES[fontSize] ?? SIZE_CLASSES.m)[zen ? "zen" : "test"]
           }`}
         >
-          {words.map((w, wi) => {
-            const input = typed[wi]
-            return (
-              <span
-                key={wi}
-                ref={(el) => (wordElsRef.current[wi] = el)}
-                className={`relative whitespace-nowrap ${
-                  input === undefined ? "text-sub" : ""
-                }`}
-              >
-                {w.split("").map((ch, ci) => {
-                  const t = input?.[ci]
-                  const cls =
-                    t === undefined
-                      ? "text-sub"
-                      : t === ch
-                        ? "text-text"
-                        : "text-error"
-                  return (
-                    <span key={ci} data-ci={ci} className="inline-block align-top">
-                      <span className={cls}>{ch}</span>
-                    </span>
-                  )
-                })}
-                {input != null &&
-                  input.length > w.length &&
-                  input.slice(w.length).split("").map((ch, i) => (
-                    <span
-                      key={`x${i}`}
-                      data-ci={w.length + i}
-                      className="inline-block align-top text-error-extra"
-                    >
-                      {ch}
-                    </span>
-                  ))}
-              </span>
-            )
-          })}
+          {words.map((w, wi) => (
+            <Word key={wi} w={w} input={typed[wi]} />
+          ))}
 
           <Caret
             x={springX}

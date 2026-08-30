@@ -118,11 +118,15 @@ function rand(n) {
   return a[0] % n
 }
 
-export function sampleWords(n) {
+export function sampleWords(n, { min = 0, max = Infinity } = {}) {
+  const pool =
+    min > 0 || max < Infinity
+      ? WORDS.filter((w) => w.length >= min && w.length <= max)
+      : WORDS
   const out = []
   const recent = []
   while (out.length < n) {
-    const w = WORDS[rand(WORDS.length)]
+    const w = pool[rand(pool.length)]
     if (recent.includes(w)) continue
     out.push(w)
     recent.push(w)

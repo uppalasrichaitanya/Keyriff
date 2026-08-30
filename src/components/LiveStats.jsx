@@ -16,7 +16,8 @@ function BoltIcon() {
   )
 }
 
-function Spark({ series }) {
+/* memoized: only redraws when the series gains a second */
+const Spark = memo(function Spark({ series }) {
   const W = 150
   const H = 42
   const maxW = Math.max(30, ...series.map((p) => p.wpm)) * 1.15
@@ -33,7 +34,7 @@ function Spark({ series }) {
   return (
     <motion.svg
       viewBox={`0 0 ${W} ${H}`}
-      className="h-11 w-40"
+      className="hidden h-11 w-36 min-[480px]:block sm:w-40"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
@@ -64,7 +65,7 @@ function Spark({ series }) {
       />
     </motion.svg>
   )
-}
+})
 
 function LiveStats({
   status,
@@ -159,7 +160,7 @@ function LiveStats({
   }, [streak, running, settings.sound])
 
   return (
-    <div className="mb-3 flex h-14 items-end justify-between px-1 select-none">
+    <div className="mb-3 flex h-12 select-none items-end justify-between sm:h-14">
       <AnimatePresence mode="wait">
         {big != null ? (
           <motion.span
@@ -168,7 +169,7 @@ function LiveStats({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="text-5xl font-bold tabular-nums text-accent"
+            className="text-4xl font-extrabold tabular-nums text-accent sm:text-5xl"
           >
             {big}
           </motion.span>
@@ -178,7 +179,7 @@ function LiveStats({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-5xl font-bold tabular-nums text-sub/40"
+            className="text-4xl font-extrabold tabular-nums text-sub/40 sm:text-5xl"
           >
             {settings.mode === "time"
               ? settings.timeValue
@@ -189,7 +190,7 @@ function LiveStats({
         )}
       </AnimatePresence>
 
-      <div className="flex items-end gap-5 pb-1">
+      <div className="flex items-end gap-3 pb-1 sm:gap-5">
         <AnimatePresence>
           {running && series.length > 1 && (
             <Spark key="spark" series={series} />
@@ -230,7 +231,7 @@ function LiveStats({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="flex gap-5 text-sm"
+              className="flex gap-3 text-sm sm:gap-5"
             >
               <span className="text-sub">
                 wpm{" "}

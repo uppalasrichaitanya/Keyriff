@@ -1,18 +1,30 @@
 import { useEffect, useRef, useState, memo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import { reduceMotion } from "../lib/motion"
 
 const TIME_VALUES = [15, 30, 60, 120]
 const WORD_VALUES = [10, 25, 50, 100]
+const WORD_LENGTHS = ["any", "short", "long"]
+
+const barVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.022, delayChildren: 0.04 } },
+}
+const pillVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
+}
 
 function Pill({ active, children, onClick, label }) {
   return (
     <motion.button
+      variants={pillVariants}
       whileTap={{ scale: 0.92 }}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       aria-label={label}
       aria-pressed={active}
-      className={`relative rounded-md px-2 py-1 text-sm transition-colors duration-150 ${
+      className={`relative rounded-md px-2 py-1 text-[13px] transition-colors duration-150 sm:text-sm ${
         active ? "text-accent" : "text-sub hover:text-text"
       }`}
     >
@@ -67,7 +79,7 @@ function CustomTextModal({ initial, onStart, onClose }) {
         exit={{ scale: 0.94, y: 10 }}
         transition={{ type: "spring", stiffness: 320, damping: 26 }}
         onMouseDown={(e) => e.stopPropagation()}
-        className="glass w-full max-w-lg rounded-2xl bg-surface p-5 shadow-2xl"
+        className="glass max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-5 shadow-2xl"
       >
         <h3 className="mb-1 text-base font-semibold text-text">custom text</h3>
         <p className="mb-3 text-xs text-sub">
@@ -129,7 +141,11 @@ function ConfigBar({ settings, onChange }) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-center gap-0.5 select-none">
+      <motion.div
+        variants={barVariants}
+        {...(reduceMotion() ? { initial: false } : { initial: "hidden", animate: "show" })}
+        className="flex flex-wrap items-center justify-center gap-0.5 select-none"
+      >
         {settings.mode !== "quote" && settings.mode !== "custom" && (
           <>
             <Pill
@@ -182,6 +198,24 @@ function ConfigBar({ settings, onChange }) {
 
         <Divider />
 
+        {settings.mode !== "quote" && settings.mode !== "custom" && (
+          <Pill
+            label="word length"
+            active={!!settings.wordLength && settings.wordLength !== "any"}
+            onClick={() =>
+              set({
+                wordLength:
+                  WORD_LENGTHS[
+                    (WORD_LENGTHS.indexOf(settings.wordLength ?? "any") + 1) %
+                      WORD_LENGTHS.length
+                  ],
+              })
+            }
+          >
+            abc {settings.wordLength ?? "any"}
+          </Pill>
+        )}
+
         <Pill
           label="fix errors before moving on"
           active={!!settings.forceCorrect}
@@ -216,7 +250,7 @@ function ConfigBar({ settings, onChange }) {
             ))}
           </>
         )}
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {customOpen && (

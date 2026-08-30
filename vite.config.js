@@ -10,6 +10,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'logo.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
       manifest: {
         name: 'typer',
         short_name: 'typer',
@@ -17,6 +20,7 @@ export default defineConfig({
         theme_color: '#323437',
         background_color: '#323437',
         display: 'standalone',
+        categories: ['productivity', 'utilities'],
         icons: [
           { src: '/pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/pwa-512.png', sizes: '512x512', type: 'image/png' },

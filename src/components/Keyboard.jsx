@@ -2,6 +2,10 @@ import { useEffect, useRef, useState, memo } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import { ROWS, targetsFor } from "../lib/keys"
 import { playRelease } from "../lib/sound"
+import { useFitScale } from "../hooks/useFitScale"
+
+const DESIGN_W = 760
+const DESIGN_H = 352
 
 
 function Key({ k, isPressed, isGlow, isCapsLit, heatRatio }) {
@@ -46,12 +50,22 @@ function Keyboard({
   externalPressed,
   compact = false,
   heatMap = null,
+  errorTick = 0,
 }) {
   const [pressed, setPressed] = useState(() => new Set())
   const timersRef = useRef(new Map())
   const reduceMotionRef = useRef(false)
   const playingRef = useRef(playing)
   playingRef.current = playing
+  const frameRef = useRef(null)
+
+  useEffect(() => {
+    if (!errorTick || !frameRef.current) return
+    const el = frameRef.current
+    el.classList.add("error-flash")
+    const t = setTimeout(() => el.classList.remove("error-flash"), 180)
+    return () => clearTimeout(t)
+  }, [errorTick])
   const tiltX = useMotionValue(0)
   const tiltY = useMotionValue(0)
   const springTiltX = useSpring(tiltX, { stiffness: 130, damping: 17 })
@@ -143,47 +157,63 @@ function Keyboard({
       ? new Set([...pressed, ...externalPressed])
       : pressed
 
+  const { ref: fitRef, scale } = useFitScale(DESIGN_W, DESIGN_H)
+
   return (
     <div
+      ref={fitRef}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={`select-none px-1 ${compact ? "" : "mt-10 pb-2 pt-3"}`}
     >
-      <div className="kb-scene">
-        <motion.div
-          className="kb-parallax"
-          style={{ rotateX: springTiltX, rotateY: springTiltY }}
+      <div
+        className="flex justify-center overflow-hidden"
+        style={{ height: DESIGN_H * scale }}
+      >
+        <div
+          style={{
+            width: DESIGN_W,
+            transform: `scale(${scale})`,
+            transformOrigin: "top center",
+          }}
         >
-          <div className="kb-board">
-          <div className="kb-frame">
-            <i className="kb-corner tl" aria-hidden />
-            <i className="kb-corner br" aria-hidden />
-            <i className="kb-frame-front" aria-hidden />
-            <div className="kb-rows">
-              {ROWS.map((row, ri) => (
-                <div key={ri} className="kb-row">
-                  {row.map((k) => (
-                    <Key
-                      key={k.code}
-                      k={k}
-                      isPressed={allPressed.has(k.code)}
-                      isGlow={
-                        glowSet.has(k.code) ||
-                        (shift && k.code.startsWith("Shift"))
-                      }
-                      isCapsLit={k.code === "CapsLock" && capsLock}
-                      heatRatio={heatMap ? (heatMap[k.code] ?? null) : null}
-                    />
+          <div className="kb-scene">
+            <motion.div
+              className="kb-parallax"
+              style={{ rotateX: springTiltX, rotateY: springTiltY }}
+            >
+              <div className="kb-board">
+              <div className="kb-frame" ref={frameRef}>
+                <i className="kb-corner tl" aria-hidden />
+                <i className="kb-corner br" aria-hidden />
+                <i className="kb-frame-front" aria-hidden />
+                <div className="kb-rows">
+                  {ROWS.map((row, ri) => (
+                    <div key={ri} className="kb-row">
+                      {row.map((k) => (
+                        <Key
+                          key={k.code}
+                          k={k}
+                          isPressed={allPressed.has(k.code)}
+                          isGlow={
+                            glowSet.has(k.code) ||
+                            (shift && k.code.startsWith("Shift"))
+                          }
+                          isCapsLit={k.code === "CapsLock" && capsLock}
+                          heatRatio={heatMap ? (heatMap[k.code] ?? null) : null}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
-              ))}
-            </div>
+              </div>
+              </div>
+            </motion.div>
           </div>
-          </div>
-        </motion.div>
+          <div className="kb-reflection" />
+          <div className="kb-shadow" />
+        </div>
       </div>
-      <div className="kb-reflection" />
-      <div className="kb-shadow" />
     </div>
   )
 }

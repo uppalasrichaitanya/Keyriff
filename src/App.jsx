@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion, MotionConfig } from "framer-motion"
 import TopBar from "./components/TopBar"
 import ConfigBar from "./components/ConfigBar"
 import TypingTest from "./components/TypingTest"
@@ -16,6 +16,7 @@ import { useTypingEngine } from "./hooks/useTypingEngine"
 import { applyTheme, getTheme } from "./lib/themes"
 import { rowOfChar, targetsFor } from "./lib/keys"
 import { sampleWeakWords } from "./lib/engine"
+import { screenMotion } from "./lib/motion"
 import {
   playError,
   playFinish,
@@ -40,6 +41,8 @@ const DEFAULT_SETTINGS = {
   customText: "",
   showHeat: false,
   forceCorrect: false,
+  wordLength: "any",
+  fontSize: "m",
 }
 
 function RestartIcon() {
@@ -80,6 +83,11 @@ export default function App() {
   const [lastResult, setLastResult] = useState(null)
   const [blurred, setBlurred] = useState(false)
   const [zen, setZen] = useState(false)
+  const [seenIntro, setSeenIntro] = useLocalStorage(
+    "typer:v2:seen-intro",
+    false
+  )
+  const mainRef = useRef(null)
 
   const isTouch = useMemo(() => isTouchDevice(), [])
   const focusInputRef = useRef(null)
@@ -190,6 +198,7 @@ export default function App() {
     settings.wordValue,
     settings.punctuation,
     settings.numbers,
+    settings.wordLength,
     settings.customText,
   ])
 
@@ -243,6 +252,10 @@ export default function App() {
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [engineRestart, engineStatus, screen, zen])
+
+  useEffect(() => {
+    mainRef.current?.focus({ preventScroll: true })
+  }, [screen])
 
   useEffect(() => {
     const onBlurWin = () => setBlurred(true)
@@ -336,7 +349,9 @@ export default function App() {
     currentInput.length >= currentWord.length ? " " : currentWord[currentInput.length]
 
   return (
-    <div className="flex min-h-full flex-col">
+    <MotionConfig reducedMotion="user">
+      <div className="flex min-h-full flex-col">
+        <h1 className="sr-only">typer — typing trainer</h1>
       {theme.flair && (
         <div className="aurora" aria-hidden>
           <span className="a1" />
@@ -344,6 +359,8 @@ export default function App() {
           <span className="a3" />
         </div>
       )}
+      <div className="vignette" aria-hidden />
+      <div className="grain" aria-hidden />
       <TopBar
         settings={settings}
         themeId={themeId}
@@ -356,7 +373,9 @@ export default function App() {
       />
 
       <main
-        className={`mx-auto flex w-full flex-1 flex-col justify-center px-6 pb-6 transition-all duration-300 ${
+        ref={mainRef}
+        tabIndex={-1}
+        className={`mx-auto flex w-full flex-1 flex-col justify-center px-4 outline-none sm:px-6 pb-6 transition-all duration-300 ${
           zen ? "max-w-5xl" : "max-w-4xl"
         }`}
       >
@@ -364,11 +383,32 @@ export default function App() {
           {screen === "test" ? (
             <motion.div
               key="test"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -16, transition: { duration: 0.18 } }}
+              {...screenMotion()}
               className={`flex flex-col ${zen ? "gap-4" : "gap-9"}`}
             >
+              {!zen && (
+                <AnimatePresence>
+                  {!seenIntro && history.length === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.25 }}
+                      className="glass mx-auto flex w-fit max-w-full items-center gap-3 rounded-xl bg-surface px-4 py-2.5 text-sm text-sub"
+                    >
+                      <span className="truncate">
+                        just start typing — <span className="font-semibold text-text">tab</span> restarts
+                      </span>
+                      <button
+                        onClick={() => setSeenIntro(true)}
+                        className="shrink-0 rounded-md bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent transition-colors duration-150 hover:bg-accent/25"
+                      >
+                        got it
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
               {!zen && <ConfigBar settings={settings} onChange={setSettings} />}
               <div>
                 {!zen && (
@@ -391,6 +431,7 @@ export default function App() {
                   capsLock={capsLock}
                   blurred={blurred}
                   zen={zen}
+                  fontSize={settings.fontSize}
                   onFocusRequest={requestFocus}
                 />
                 <ProgressBar
@@ -410,7 +451,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setZen(false)}
                       title="exit zen mode"
-                      className="rounded-lg p-2 text-sub transition-colors duration-150 hover:text-text"
+                      className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <ShrinkIcon />
                     </motion.button>
@@ -421,11 +462,41 @@ export default function App() {
                       whileTap={{ scale: 0.88 }}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() =>
+                        setSettings((s) => ({
+                          ...s,
+                          fontSize:
+                            s.fontSize === "s" ? "m" : s.fontSize === "m" ? "l" : "s",
+                        }))
+                      }
+                      title="cycle test text size"
+                      aria-label={`text size ${settings.fontSize}`}
+                      className={`rounded-lg p-2.5 transition-colors duration-150 ${
+                        settings.fontSize !== "m"
+                          ? "text-accent"
+                          : "text-sub hover:text-text"
+                      }`}
+                    >
+                      <span
+                        className={`block font-bold leading-none ${
+                          settings.fontSize === "s"
+                            ? "text-xs"
+                            : settings.fontSize === "m"
+                              ? "text-sm"
+                              : "text-base"
+                        }`}
+                      >
+                        Aa
+                      </span>
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.88 }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() =>
                         setSettings((s) => ({ ...s, showHeat: !s.showHeat }))
                       }
                       title="show your weak keys on the keyboard"
                       aria-pressed={!!settings.showHeat}
-                      className={`rounded-lg p-2 transition-colors duration-150 ${
+                      className={`rounded-lg p-2.5 transition-colors duration-150 ${
                         settings.showHeat
                           ? "text-error"
                           : "text-sub hover:text-text"
@@ -442,7 +513,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setZen(true)}
                       title="zen mode — hide everything"
-                      className="rounded-lg p-2 text-sub transition-colors duration-150 hover:text-text"
+                      className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <ZenIcon />
                     </motion.button>
@@ -451,7 +522,7 @@ export default function App() {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={nextTest}
                       title="restart test"
-                      className="rounded-lg p-2 text-sub transition-colors duration-150 hover:text-text"
+                      className="rounded-lg p-2.5 text-sub transition-colors duration-150 hover:text-text"
                     >
                       <RestartIcon />
                     </motion.button>
@@ -464,18 +535,13 @@ export default function App() {
                     active={status !== "finished"}
                     playing={status === "running"}
                     heatMap={settings.showHeat ? heatMap : null}
+                    errorTick={errorTick}
                   />
                 )}
               </div>
             </motion.div>
           ) : screen === "stats" ? (
-            <motion.div
-              key="stats"
-              initial={{ opacity: 0, y: 22 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16, transition: { duration: 0.18 } }}
-              transition={{ type: "spring", stiffness: 220, damping: 26 }}
-            >
+            <motion.div key="stats" {...screenMotion()}>
               <StatsPage
                 history={history}
                 pbs={pbs}
@@ -490,12 +556,7 @@ export default function App() {
             </motion.div>
           ) : (
             lastResult && (
-              <motion.div
-                key="result"
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 220, damping: 26 }}
-              >
+              <motion.div key="result" {...screenMotion()}>
                 <ResultScreen result={lastResult} onNext={nextTest} />
               </motion.div>
             )
@@ -511,6 +572,7 @@ export default function App() {
           registerFocus={registerFocus}
         />
       )}
-    </div>
+      </div>
+    </MotionConfig>
   )
 }

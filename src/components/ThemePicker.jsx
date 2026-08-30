@@ -60,7 +60,7 @@ export default function ThemePicker({ themeId, onChange }) {
         aria-label="choose theme"
         aria-expanded={open}
         title="choose theme"
-        className={`rounded-lg p-2 transition-colors duration-150 ${
+        className={`rounded-lg p-2.5 transition-colors duration-150 ${
           open ? "text-text" : "text-sub hover:text-text"
         }`}
       >

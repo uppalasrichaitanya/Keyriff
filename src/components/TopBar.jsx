@@ -64,7 +64,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
         aria-label="sound settings"
         aria-expanded={open}
         title={`sound ${sound ? "on" : "muted"} · ${volume}%`}
-        className={`rounded-lg p-2 transition-colors duration-150 ${
+        className={`rounded-lg p-2.5 transition-colors duration-150 ${
           sound && volume > 0
             ? "text-accent"
             : "text-sub hover:text-text"
@@ -163,7 +163,7 @@ function TopBar({
   onToggleStats,
 }) {
   return (
-    <header className="flex items-center justify-between px-6 py-5 md:px-10">
+    <header className="safe-top flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5 md:px-10">
       <div className="flex items-center gap-3 select-none">
         <motion.div
           whileHover={{ rotate: -8, scale: 1.06 }}
@@ -188,9 +188,9 @@ function TopBar({
           onClick={onToggleStats}
           aria-label={screen === "stats" ? "back to test" : "open stats"}
           title={screen === "stats" ? "back to test" : "your stats"}
-          className={`rounded-lg p-2 transition-colors duration-150 ${
-            screen === "stats" ? "text-accent" : "text-sub hover:text-text"
-          }`}
+        className={`rounded-lg p-2.5 transition-colors duration-150 ${
+          screen === "stats" ? "text-accent" : "text-sub hover:text-text"
+        }`}
         >
           <ChartIcon />
         </motion.button>

@@ -2,8 +2,14 @@ import { sampleWords, WORDS } from "./words.js"
 import { sampleQuote } from "./quotes.js"
 import { charForCode } from "./keys.js"
 
+export function wordLenOpts(wordLength) {
+  if (wordLength === "short") return { max: 4 }
+  if (wordLength === "long") return { min: 6 }
+  return {}
+}
+
 export function generateTest(settings) {
-  const { mode, timeValue, wordValue, punctuation, numbers } = settings
+  const { mode, timeValue, wordValue, punctuation, numbers, wordLength } = settings
   if (mode === "quote") {
     return sampleQuote().text.trim().split(/\s+/)
   }
@@ -13,7 +19,7 @@ export function generateTest(settings) {
   }
   const count =
     mode === "time" ? Math.max(50, timeValue * 4) : wordValue
-  let words = sampleWords(count)
+  let words = sampleWords(count, wordLenOpts(wordLength))
   if (numbers) words = applyNumbers(words)
   if (punctuation) words = applyPunctuation(words)
   return words
@@ -143,6 +149,8 @@ export function pbKey(settings, wordCount) {
       : `words-${settings.wordValue}`
   let key = settings.punctuation ? `${base}-punct` : base
   if (settings.numbers) key = `${key}-num`
+  if (settings.wordLength && settings.wordLength !== "any")
+    key = `${key}-${settings.wordLength}`
   return key
 }
 
@@ -159,5 +167,7 @@ export function formatMode(settings, wordCount) {
       : `${settings.wordValue} words`
   let label = settings.punctuation ? `${base} · punct` : base
   if (settings.numbers) label = `${label} · num`
+  if (settings.wordLength && settings.wordLength !== "any")
+    label = `${label} · ${settings.wordLength}`
   return label
 }

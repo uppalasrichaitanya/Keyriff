@@ -1,19 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f6d564"/>
-      <stop offset="100%" stop-color="#e2b714"/>
-    </linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f6d564" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#e2b714" stop-opacity="0.2"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8da6b"/>
+      <stop offset="55%" stop-color="#eec22e"/>
+      <stop offset="100%" stop-color="#dca90d"/>
     </linearGradient>
   </defs>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" fill="#1d1f23"/>
-  <rect x="0.9" y="0.9" width="30.2" height="30.2" rx="7.1" fill="none" stroke="url(#ring)" stroke-width="1.2"/>
-  <rect x="13.75" y="4.5" width="4.5" height="6.5" rx="2.25" fill="url(#g)">
-    <animate attributeName="opacity" values="1;1;0.15;1;1" keyTimes="0;0.44;0.5;0.56;1" dur="1.5s" repeatCount="indefinite"/>
+  <rect width="32" height="32" rx="7.5" fill="url(#tile)"/>
+  <g fill="#8a6a08" opacity="0.4" transform="translate(0 0.8)">
+    <rect x="13.75" y="4.5" width="4.5" height="6.5" rx="2.25"/>
+    <rect x="6" y="13.5" width="20" height="4.5" rx="2.25"/>
+    <rect x="13.75" y="13.5" width="4.5" height="14" rx="2.25"/>
+  </g>
+  <g fill="#ffffff">
+    <rect x="6" y="13.5" width="20" height="4.5" rx="2.25"/>
+    <rect x="13.75" y="13.5" width="4.5" height="14" rx="2.25"/>
+  </g>
+  <rect x="14.75" y="4.75" width="2.5" height="6.2" rx="1.25" fill="#fffdf2">
+    <animate attributeName="opacity" values="1;1;0.1;1;1" keyTimes="0;0.44;0.5;0.56;1" dur="1.5s" repeatCount="indefinite"/>
   </rect>
-  <rect x="6" y="13.5" width="20" height="4.5" rx="2.25" fill="url(#g)"/>
-  <rect x="13.75" y="13.5" width="4.5" height="14" rx="2.25" fill="url(#g)"/>
 </svg>

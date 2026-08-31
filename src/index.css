@@ -149,9 +149,99 @@ button {
   will-change: transform;
 }
 
+/* embers: bigger warm sparks, quicker rise */
+.bgfx .motes.embers {
+  background-image:
+    radial-gradient(1.8px 2.4px at 30% 32%, color-mix(in srgb, var(--color-accent) 75%, transparent) 50%, transparent 51%),
+    radial-gradient(1.4px 1.8px at 70% 60%, color-mix(in srgb, var(--color-error) 55%, transparent) 50%, transparent 51%),
+    radial-gradient(2.2px 2.8px at 50% 82%, color-mix(in srgb, var(--color-accent-2) 60%, transparent) 50%, transparent 51%);
+  background-size: 300px 300px;
+  opacity: 0.6;
+  animation-duration: 17s;
+}
+
+/* snow: slow white fall */
+.bgfx .motes.snow {
+  background-image:
+    radial-gradient(1.6px 1.6px at 30% 32%, color-mix(in srgb, white 70%, transparent) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 70% 60%, color-mix(in srgb, white 50%, transparent) 50%, transparent 51%),
+    radial-gradient(2px 2px at 50% 82%, color-mix(in srgb, white 42%, transparent) 50%, transparent 51%);
+  background-size: 340px 340px;
+  opacity: 0.45;
+  animation: motes-fall 38s linear infinite;
+}
+
+/* bubbles: sparse, large, slow */
+.bgfx .motes.bubbles {
+  background-image:
+    radial-gradient(3px 3px at 30% 32%, color-mix(in srgb, var(--color-accent-2) 34%, transparent) 50%, transparent 51%),
+    radial-gradient(2px 2px at 72% 62%, color-mix(in srgb, var(--color-text) 26%, transparent) 50%, transparent 51%),
+    radial-gradient(4px 4px at 52% 84%, color-mix(in srgb, var(--color-accent) 28%, transparent) 50%, transparent 51%);
+  background-size: 460px 460px;
+  opacity: 0.4;
+  animation-duration: 52s;
+}
+
 @keyframes motes-rise {
   from { transform: translateY(0); }
   to { transform: translateY(-380px); }
+}
+
+@keyframes motes-fall {
+  from { transform: translateY(0); }
+  to { transform: translateY(340px); }
+}
+
+/* matrix rain: thin falling streaks */
+.bgfx .drop {
+  position: absolute;
+  top: -28vh;
+  width: 2px;
+  height: 24vh;
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 85%, transparent) 55%,
+    transparent
+  );
+  opacity: 0.5;
+  animation: drop-fall 3.4s linear infinite;
+}
+
+.bgfx .drop.d2 { left: 28%; height: 17vh; opacity: 0.32; animation-delay: 1.15s; animation-duration: 4.1s; }
+.bgfx .drop.d3 { left: 45%; opacity: 0.42; animation-delay: 2.1s; animation-duration: 3s; }
+.bgfx .drop.d4 { left: 61%; height: 19vh; opacity: 0.3; animation-delay: 0.55s; animation-duration: 4.6s; }
+.bgfx .drop.d5 { left: 74%; opacity: 0.46; animation-delay: 1.65s; animation-duration: 3.7s; }
+.bgfx .drop.d6 { left: 88%; height: 15vh; opacity: 0.3; animation-delay: 2.7s; animation-duration: 3.1s; }
+.bgfx .drop.d1 { left: 12%; }
+
+@keyframes drop-fall {
+  from { transform: translateY(-12vh); }
+  to { transform: translateY(145vh); }
+}
+
+/* soft scan band drifting down — CRT-ish themes */
+.bgfx .scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26vh;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 5%, transparent),
+    transparent
+  );
+  animation: scan-drift 11s ease-in-out infinite;
+}
+
+@keyframes scan-drift {
+  0% { transform: translateY(-30vh); opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 0.8; }
+  100% { transform: translateY(115vh); opacity: 0; }
 }
 
 [data-scheme="light"] .bgfx .orb1 {
@@ -176,7 +266,9 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .bgfx .orb,
-  .bgfx .motes {
+  .bgfx .motes,
+  .bgfx .drop,
+  .bgfx .scan {
     animation: none;
   }
 }
@@ -349,6 +441,31 @@ button {
   animation: twinkle 7s ease-in-out infinite alternate-reverse, drift-b 90s linear infinite;
 }
 
+/* occasional shooting star */
+.flair-stars .s3 {
+  position: absolute;
+  top: 12%;
+  left: -12%;
+  width: 130px;
+  height: 1.5px;
+  border-radius: 9999px;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-text) 85%, transparent)
+  );
+  transform: rotate(-14deg);
+  animation: shoot 11s ease-in infinite;
+}
+
+@keyframes shoot {
+  0%, 82% { transform: translateX(0) rotate(-14deg); opacity: 0; }
+  86% { opacity: calc(0.9 * var(--aurora-o, 1)); }
+  92% { transform: translateX(58vw) rotate(-14deg); opacity: calc(0.9 * var(--aurora-o, 1)); }
+  100% { transform: translateX(66vw) rotate(-14deg); opacity: 0; }
+}
+
 @keyframes twinkle {
   from { opacity: calc(0.35 * var(--aurora-o, 1)); }
   to { opacity: calc(0.95 * var(--aurora-o, 1)); }
@@ -397,6 +514,25 @@ button {
   bottom: -22vh;
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
   animation: drift-c 50s ease-in-out infinite alternate;
+}
+
+/* slow orbiting ring — a distant planet */
+.flair-mesh .m-ring {
+  position: absolute;
+  right: -12vw;
+  top: -14vh;
+  width: 38vw;
+  height: 38vw;
+  border-radius: 50%;
+  border: 1.5px solid
+    color-mix(in srgb, var(--color-accent-2) 28%, transparent);
+  transform: rotate(-18deg);
+  animation: ring-pulse 16s ease-in-out infinite alternate;
+}
+
+@keyframes ring-pulse {
+  from { opacity: 0.35; transform: rotate(-18deg) scale(1); }
+  to { opacity: 0.75; transform: rotate(-14deg) scale(1.06); }
 }
 
 /* ---------- vapor grid flair ---------- */
@@ -450,6 +586,58 @@ button {
   filter: blur(1px);
 }
 
+/* neon sun on the horizon */
+.flair-grid .g-sun {
+  position: absolute;
+  left: 50%;
+  bottom: 33.5%;
+  width: 15vmin;
+  height: 15vmin;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  opacity: calc(0.75 * var(--aurora-o, 1));
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-2),
+    var(--color-accent) 58%,
+    transparent
+  );
+  mask-image: repeating-linear-gradient(
+    180deg,
+    black 0 6px,
+    transparent 6px 9px
+  );
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    black 0 6px,
+    transparent 6px 9px
+  );
+  filter: blur(0.5px);
+}
+
+/* occasional scanline sweeping up the screen */
+.flair-grid .g-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 90px;
+  bottom: 0;
+  opacity: calc(0.14 * var(--aurora-o, 1));
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent-2) 80%, transparent),
+    transparent
+  );
+  animation: scan-up 7s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes scan-up {
+  0%, 55% { transform: translateY(0); opacity: 0; }
+  60% { opacity: calc(0.16 * var(--aurora-o, 1)); }
+  100% { transform: translateY(-105vh); opacity: 0; }
+}
+
 @keyframes grid-scroll {
   from { background-position: 0 0, 0 0; }
   to { background-position: 0 0, 0 64px; }
@@ -458,7 +646,8 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .flair-stars span,
   .flair-mesh span,
-  .flair-grid .g-floor {
+  .flair-grid .g-floor,
+  .flair-grid .g-scan {
     animation: none;
   }
 }

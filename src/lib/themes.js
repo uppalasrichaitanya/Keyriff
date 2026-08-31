@@ -457,6 +457,29 @@ export const THEMES = [
 
 export const DEFAULT_THEME = THEMES[0]
 
+/* per-theme ambient effect: which particles/motion suit the mood */
+const AMBIENT = {
+  evergreen: "snow",
+  arctic: "snow",
+  nordic: "snow",
+  matrix: "rain",
+  ambercrt: "scan",
+  carbon: "scan",
+  onedark: "motes",
+  monokai: "motes",
+  solarized: "motes",
+  mocha: "embers",
+  gruvbox: "embers",
+  ember: "embers",
+  abyss: "bubbles",
+  linen: "motes",
+  studio: "motes",
+}
+
+export function ambientFor(id) {
+  return AMBIENT[id] ?? "motes"
+}
+
 const LIGHT_THEMES = new Set([
   "porcelain",
   "sakura",

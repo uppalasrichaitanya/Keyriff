@@ -72,31 +72,69 @@ const DARK_RECTS = [
 
 const GRAD_A = [0xf6, 0xd5, 0x64]
 const GRAD_B = [0xe2, 0xb7, 0x14]
-const TILE = "#1d1f23"
+
+/* gold diagonal gradient tile with a soft top shine */
+function tileColor(x, y) {
+  const t = (x + y) / (2 * S)
+  let c = [
+    GRAD_A[0] + (0xdc - GRAD_A[0]) * t,
+    GRAD_A[1] + (0xa9 - GRAD_A[1]) * t,
+    GRAD_A[2] + (0x0d - GRAD_A[2]) * t,
+  ]
+  const sy = y / S
+  if (sy < 0.42) {
+    const a = 0.3 * (1 - sy / 0.42)
+    c = [
+      c[0] + (255 - c[0]) * a,
+      c[1] + (255 - c[1]) * a,
+      c[2] + (255 - c[2]) * a,
+    ]
+  }
+  return c.map((v) => Math.round(v))
+}
 
 function sample(x, y) {
   /* returns [r, g, b, a] in design space */
-  const tile = insideRounded(x, y, 1, 1, S - 2, S - 2, 15)
+  const tile = insideRounded(x, y, 0, 0, S, S, 15)
   if (!tile) return [0, 0, 0, 0]
+
+  /* depth shadow under the letterform */
   for (const rc of DARK_RECTS) {
-    if (insideRounded(x, y, rc.x, rc.y, rc.w, rc.h, rc.r)) {
-      /* vertical accent gradient down the letter */
-      const t =
-        rc.y === 9
-          ? y / 22
-          : rc.x === 12
-            ? (y - 27) / 9
-            : (y - 27) / 28
-      const k = Math.min(1, Math.max(0, t))
+    if (insideRounded(x, y, rc.x, rc.y + 1.6, rc.w, rc.h, rc.r)) {
+      const c = tileColor(x, y)
+      const a = 0.4
       return [
-        Math.round(GRAD_A[0] + (GRAD_B[0] - GRAD_A[0]) * k),
-        Math.round(GRAD_A[1] + (GRAD_B[1] - GRAD_A[1]) * k),
-        Math.round(GRAD_A[2] + (GRAD_B[2] - GRAD_A[2]) * k),
+        Math.round(c[0] + (0x8a - c[0]) * a),
+        Math.round(c[1] + (0x6a - c[1]) * a),
+        Math.round(c[2] + (0x08 - c[2]) * a),
         255,
       ]
     }
   }
-  return [0x1d, 0x1f, 0x23, 255]
+
+  /* white letterform + lit caret */
+  for (const rc of DARK_RECTS) {
+    if (insideRounded(x, y, rc.x, rc.y, rc.w, rc.h, rc.r)) {
+      return rc.y === 9 ? [0xff, 0xfd, 0xf2, 255] : [255, 255, 255, 255]
+    }
+  }
+
+  /* glow near the caret tip */
+  const dx = (x - 32) / 13
+  const dy = (y - 16.5) / 11
+  const d = Math.sqrt(dx * dx + dy * dy)
+  if (d < 1) {
+    const c = tileColor(x, y)
+    const a = 0.75 * (1 - d)
+    return [
+      Math.round(c[0] + (255 - c[0]) * a),
+      Math.round(c[1] + (249 - c[1]) * a),
+      Math.round(c[2] + (224 - c[2]) * a),
+      255,
+    ]
+  }
+
+  return tileColor(x, y)
 }
 
 function render(size) {

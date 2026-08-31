@@ -1,33 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f6d564"/>
-      <stop offset="100%" stop-color="#e2b714"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8da6b"/>
+      <stop offset="55%" stop-color="#eec22e"/>
+      <stop offset="100%" stop-color="#dca90d"/>
     </linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f6d564" stop-opacity="0.85"/>
-      <stop offset="55%" stop-color="#e2b714" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#e2b714" stop-opacity="0.15"/>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="2" result="b"/>
-      <feMerge>
-        <feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff9e0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fff9e0" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
-  <!-- keycap tile -->
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="#1d1f23"/>
-  <rect x="1.75" y="1.75" width="60.5" height="60.5" rx="14.25" fill="none" stroke="url(#ring)" stroke-width="1.5"/>
+  <!-- tile -->
+  <rect width="64" height="64" rx="15" fill="url(#tile)"/>
+  <rect width="64" height="64" rx="15" fill="url(#shine)"/>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
 
-  <!-- letter t — the ascender is a blinking caret -->
-  <g filter="url(#glow)">
-    <rect x="27.5" y="9" width="9" height="13" rx="4.5" fill="url(#g)">
-      <animate attributeName="opacity" values="1;1;0.12;1;1" keyTimes="0;0.44;0.5;0.56;1" dur="1.5s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="12" y="27" width="40" height="9" rx="4.5" fill="url(#g)"/>
-    <rect x="27.5" y="27" width="9" height="28" rx="4.5" fill="url(#g)"/>
+  <!-- glow behind the caret -->
+  <ellipse cx="32" cy="16.5" rx="13" ry="11" fill="url(#glow)"/>
+
+  <!-- depth shadow -->
+  <g fill="#8a6a08" opacity="0.4" transform="translate(0 1.6)">
+    <rect x="27.5" y="9" width="9" height="13" rx="4.5"/>
+    <rect x="12" y="27" width="40" height="9" rx="4.5"/>
+    <rect x="27.5" y="27" width="9" height="28" rx="4.5"/>
   </g>
+
+  <!-- letterform -->
+  <g fill="#ffffff">
+    <rect x="12" y="27" width="40" height="9" rx="4.5"/>
+    <rect x="27.5" y="27" width="9" height="28" rx="4.5"/>
+  </g>
+
+  <!-- blinking caret -->
+  <rect x="29.5" y="9.5" width="5" height="12.5" rx="2.5" fill="#fffdf2">
+    <animate attributeName="opacity" values="1;1;0.1;1;1" keyTimes="0;0.44;0.5;0.56;1" dur="1.5s" repeatCount="indefinite"/>
+  </rect>
 </svg>

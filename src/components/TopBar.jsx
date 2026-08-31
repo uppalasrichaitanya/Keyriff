@@ -136,7 +136,7 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
                       onPackChange(p.id)
-                      setTimeout(() => playKey(), 30)
+                      setTimeout(() => playKey({ row: 2, col: 0 }), 30)
                     }}
                     aria-pressed={pack === p.id}
                     className={`rounded-md px-2 py-1.5 text-xs font-medium transition-colors duration-100 ${

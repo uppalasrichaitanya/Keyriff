@@ -131,3 +131,17 @@ export function rowOfChar(ch) {
   }
   return 2
 }
+
+/* horizontal position of a key, normalized -1 (left) … 1 (right) —
+   drives the stereo pan of key sounds */
+export function colOfChar(ch) {
+  if (!ch) return 0
+  const { codes } = targetsFor(ch)
+  const code = codes[0]
+  if (!code) return 0
+  for (const row of ROWS) {
+    const i = row.findIndex((k) => k.code === code)
+    if (i >= 0) return row.length > 1 ? (i / (row.length - 1)) * 2 - 1 : 0
+  }
+  return 0
+}

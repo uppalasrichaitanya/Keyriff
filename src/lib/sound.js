@@ -6,6 +6,8 @@ let enabled = true
 let volume = 0.7
 export const DEFAULT_PACK = "tactile"
 let packId = DEFAULT_PACK
+/* stereo pan for the current sound (-1 left … 1 right) */
+let pan = 0
 
 export function setSoundEnabled(v) {
   enabled = v
@@ -58,7 +60,14 @@ function buildReverb() {
 }
 
 function out(node) {
-  node.connect(master)
+  let dest = master
+  if (pan !== 0 && ctx.createStereoPanner) {
+    const p = ctx.createStereoPanner()
+    p.pan.value = Math.max(-1, Math.min(1, pan))
+    p.connect(master)
+    dest = p
+  }
+  node.connect(dest)
   if (verb) node.connect(verb)
 }
 
@@ -316,21 +325,25 @@ export function setPack(id) {
 
 export function playKey(opts) {
   if (!audio()) return
+  pan = (opts?.col ?? 0) * 0.24
   PACKS[packId].key(opts)
 }
 
 export function playRelease() {
   if (!audio()) return
+  pan = 0
   PACKS[packId].release()
 }
 
 export function playSpace() {
   if (!audio()) return
+  pan = 0
   PACKS[packId].space()
 }
 
 export function playError() {
   if (!audio()) return
+  pan = 0
   tone({ freq: 118, endFreq: 76, type: "triangle", gain: 0.3, duration: 0.085 })
   burst({ freq: 1900, type: "bandpass", q: 0.9, gain: 0.08, duration: 0.028 })
 }

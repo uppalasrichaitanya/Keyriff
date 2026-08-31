@@ -2,16 +2,18 @@
 
 A beautiful, local-first typing trainer. Everything runs and stays in your browser — no accounts, no tracking, no network.
 
+Glowing caret logo. Animated per-theme backdrops — aurora, starfields with shooting stars, nebulae with orbiting rings, vaporwave sunsets with a scrolling grid and scanning glow, matrix rain, drifting embers and snow. Ten hand-crafted 3D keyboard styles. Nine synthetic switch sound packs with stereo key panning that follows your hands across the board.
+
 ## Features
 
 - **Modes** — time (15/30/60/120s), words (10/25/50/100), quotes, custom text, a **weak-key practice drill** built from your own mistake stats, and a **daily challenge**: the same seeded test for everyone each day
 - **Modifiers** — punctuation, numbers, word-length tiers (short/any/long), force-correct mode, and **sudden death** (one mistake ends the test)
 - **10 keyboard styles** — laser, solid, retro, terminal, low profile, gummy, neon (blacklight glow), chrome (polished metal), ice (frosted glass), artisan (glossy resin) — pairable with any of the **9 sound packs**
-- **33 themes** — including animated flair types: aurora, **starfield**, **gradient mesh**, and a **vapor grid horizon**; all palettes audited for WCAG contrast
+- **33 themes** — each with an ambient animation that suits its mood: aurora, starfield (shooting stars), gradient mesh (orbiting ring), vapor grid (neon sun + scanline), matrix rain, embers, snow, bubbles, scanline drift; all palettes audited for WCAG contrast
 - **Live feedback** — WPM/accuracy, sparkline, correct-streak with milestone sounds, countdown ticks, red-line final-seconds progress, live WPM in the tab title
 - **Results** — count-up stats, WPM-over-time chart with error markers and a PB reference line, keyboard **replay** of your exact keystrokes (seek + speed), shareable result card (copy image or save PNG), confetti on personal bests
 - **3D keyboard** — physical key highlighting, parallax tilt, weak-key heat map, error pulse, auto-scales from desktop down to phones
-- **Sound engine** — 9 synthetic switch packs (tactile, topre, bubble, thock, clicky, typewriter, linear, glass, bamboo) via Web Audio, with per-row depth
+- **Sound engine** — 9 synthetic switch packs (tactile, topre, bubble, thock, clicky, typewriter, linear, glass, bamboo) with per-row depth and **stereo panning across the key rows**; haptic tick on touch devices
 - **Stats page** — totals, today card, day streak, WPM progression chart, weak keys, personal bests, recent tests, plus export/import/reset of all your data
 - **Mobile & PWA** — touch input with "tap to type", installable, fully offline (fonts precached), safe-area aware
 - **Zen mode**, first-visit onboarding, reduced-motion support, screen-reader live regions

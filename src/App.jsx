@@ -14,8 +14,8 @@ import KbStylePicker from "./components/KbStylePicker"
 import { isTouchDevice, buzz } from "./lib/touch"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { useTypingEngine } from "./hooks/useTypingEngine"
-import { applyTheme, getTheme } from "./lib/themes"
-import { rowOfChar, targetsFor } from "./lib/keys"
+import { applyTheme, getTheme, ambientFor } from "./lib/themes"
+import { rowOfChar, colOfChar, targetsFor } from "./lib/keys"
 import { sampleWeakWords } from "./lib/engine"
 import { screenMotion } from "./lib/motion"
 import { anyDialogOpen } from "./lib/dialogs"
@@ -147,7 +147,7 @@ export default function App() {
     onChar: (ch) => {
       if (!settings.sound) return
       buzz(4)
-      playKey({ row: rowOfChar(ch) })
+      playKey({ row: rowOfChar(ch), col: colOfChar(ch) })
     },
     onSpace: () => {
       if (!settings.sound) return
@@ -382,38 +382,58 @@ export default function App() {
         <div className="bgfx" aria-hidden>
           <span className="orb orb1" />
           <span className="orb orb2" />
-          <span className="motes" />
+          {ambientFor(theme.id) === "motes" && <span className="motes" />}
+          {ambientFor(theme.id) === "embers" && <span className="motes embers" />}
+          {ambientFor(theme.id) === "snow" && <span className="motes snow" />}
+          {ambientFor(theme.id) === "bubbles" && (
+            <span className="motes bubbles" />
+          )}
+          {ambientFor(theme.id) === "scan" && <span className="scan" />}
+          {ambientFor(theme.id) === "rain" && (
+            <>
+              <span className="drop d1" />
+              <span className="drop d2" />
+              <span className="drop d3" />
+              <span className="drop d4" />
+              <span className="drop d5" />
+              <span className="drop d6" />
+            </>
+          )}
         </div>
         {theme.flair && (
-        <div className={theme.flair === "aurora" ? "aurora" : `flair-${theme.flair}`} aria-hidden>
-          {theme.flair === "aurora" && (
-            <>
-              <span className="a1" />
-              <span className="a2" />
-              <span className="a3" />
-            </>
-          )}
-          {theme.flair === "stars" && (
-            <>
-              <span className="s1" />
-              <span className="s2" />
-            </>
-          )}
-          {theme.flair === "mesh" && (
-            <>
-              <span className="m1" />
-              <span className="m2" />
-              <span className="m3" />
-            </>
-          )}
-          {theme.flair === "grid" && (
-            <>
-              <span className="g-floor" />
-              <span className="g-horizon" />
-            </>
-          )}
-        </div>
-      )}
+          <div className={theme.flair === "aurora" ? "aurora" : `flair-${theme.flair}`} aria-hidden>
+            {theme.flair === "aurora" && (
+              <>
+                <span className="a1" />
+                <span className="a2" />
+                <span className="a3" />
+              </>
+            )}
+            {theme.flair === "stars" && (
+              <>
+                <span className="s1" />
+                <span className="s2" />
+                <span className="s3" />
+              </>
+            )}
+            {theme.flair === "mesh" && (
+              <>
+                <span className="m1" />
+                <span className="m2" />
+                <span className="m3" />
+                <span className="m-ring" />
+              </>
+            )}
+            {theme.flair === "grid" && (
+              <>
+                <span className="g-floor" />
+                <span className="g-horizon" />
+                <span className="g-sun" />
+                <span className="g-scan" />
+              </>
+            )}
+          </div>
+        )}
       <div className="vignette" aria-hidden />
       <div className="grain" aria-hidden />
       <TopBar

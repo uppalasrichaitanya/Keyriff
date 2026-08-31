@@ -188,7 +188,7 @@ try {
         await page.screenshot({ path: path.join(SHOTS, `desktop-kb-${style}.png`) })
         qa[`kb_${style}`] = kbAttr
       }
-      for (const theme of ["starlight", "vaporgrid"]) {
+      for (const theme of ["starlight", "vaporgrid", "matrix", "sakura", "abyss"]) {
         await page.evaluate((t) => {
           localStorage.setItem("typer:v2:theme", JSON.stringify(t))
         }, theme)
@@ -245,6 +245,9 @@ const styleFailed = results.some((v) => {
   }
   if (v.qa.flair_starlight !== "flair-stars") return true
   if (v.qa.flair_vaporgrid !== "flair-grid") return true
+  if (v.qa.flair_matrix !== "flair-rain") return true
+  if (v.qa.flair_sakura !== "flair-petals") return true
+  if (v.qa.flair_abyss !== "flair-bubbles") return true
   return false
 })
 failed =

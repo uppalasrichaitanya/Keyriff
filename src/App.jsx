@@ -432,6 +432,56 @@ export default function App() {
                 <span className="g-scan" />
               </>
             )}
+            {theme.flair === "embers" && (
+              <>
+                <span className="e1" />
+                <span className="e2" />
+                <span className="e3" />
+                <span className="e4" />
+                <span className="e5" />
+                <span className="e6" />
+              </>
+            )}
+            {theme.flair === "rain" && (
+              <>
+                <span className="r1" />
+                <span className="r2" />
+                <span className="r3" />
+                <span className="r4" />
+                <span className="r5" />
+                <span className="r6" />
+                <span className="r7" />
+              </>
+            )}
+            {theme.flair === "bubbles" && (
+              <>
+                <span className="b1" />
+                <span className="b2" />
+                <span className="b3" />
+                <span className="b4" />
+                <span className="b5" />
+              </>
+            )}
+            {theme.flair === "snow" && (
+              <>
+                <span className="n1" />
+                <span className="n2" />
+                <span className="n3" />
+                <span className="n4" />
+                <span className="n5" />
+                <span className="n6" />
+              </>
+            )}
+            {theme.flair === "petals" && (
+              <>
+                <span className="p1" />
+                <span className="p2" />
+                <span className="p3" />
+                <span className="p4" />
+                <span className="p5" />
+                <span className="p6" />
+              </>
+            )}
           </div>
         )}
       <div className="vignette" aria-hidden />

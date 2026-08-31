@@ -2,7 +2,7 @@
 
 A beautiful, local-first typing trainer. Everything runs and stays in your browser — no accounts, no tracking, no network.
 
-Glowing caret logo. Animated per-theme backdrops — aurora, starfields with shooting stars, nebulae with orbiting rings, vaporwave sunsets with a scrolling grid and scanning glow, matrix rain, drifting embers and snow. Ten hand-crafted 3D keyboard styles. Nine synthetic switch sound packs with stereo key panning that follows your hands across the board.
+Glowing caret logo. Animated per-theme backdrops — aurora, starfields with shooting stars, nebulae with orbiting rings, vaporwave sunsets with a scrolling grid, matrix rain, rising embers, falling snow and sakura petals, deep-water bubbles, CRT scan drift. Ten hand-crafted 3D keyboard styles. Nine synthetic switch sound packs with stereo key panning that follows your hands across the board.
 
 ## Features
 

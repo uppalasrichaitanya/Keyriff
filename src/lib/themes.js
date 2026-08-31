@@ -1,8 +1,8 @@
 export const THEMES = [
   {
-    id: "serika",
-    name: "serika dark",
-    flair: "aurora",
+    id: "sakura",
+    name: "sakura",
+    flair: "petals",
     auroraO: 0.55,
     base: "#2b2d31",
     surface: "#24262a",
@@ -17,7 +17,7 @@ export const THEMES = [
   {
     id: "modern",
     name: "modern",
-    flair: "aurora",
+    flair: "stars",
     auroraO: 1,
     base: "#050810",
     surface: "rgba(148, 163, 200, 0.055)",
@@ -32,7 +32,7 @@ export const THEMES = [
   {
     id: "midnight",
     name: "midnight gold",
-    flair: "aurora",
+    flair: "stars",
     auroraO: 0.85,
     base: "#0c1120",
     surface: "#131a2e",
@@ -47,7 +47,7 @@ export const THEMES = [
   {
     id: "ember",
     name: "ember",
-    flair: "aurora",
+    flair: "embers",
     auroraO: 0.85,
     base: "#161110",
     surface: "#201815",
@@ -62,6 +62,8 @@ export const THEMES = [
   {
     id: "evergreen",
     name: "evergreen",
+    flair: "snow",
+    auroraO: 0.7,
     base: "#0b120f",
     surface: "#111b16",
     surfaceHi: "#18261f",
@@ -75,7 +77,7 @@ export const THEMES = [
   {
     id: "synthwave",
     name: "synthwave",
-    flair: "aurora",
+    flair: "grid",
     auroraO: 0.8,
     base: "#140b26",
     surface: "#1d1235",
@@ -90,7 +92,7 @@ export const THEMES = [
   {
     id: "abyss",
     name: "abyss",
-    flair: "aurora",
+    flair: "bubbles",
     auroraO: 0.75,
     base: "#05161c",
     surface: "#0a2029",
@@ -120,7 +122,7 @@ export const THEMES = [
   {
     id: "arctic",
     name: "arctic",
-    flair: "aurora",
+    flair: "snow",
     auroraO: 0.55,
     base: "#0d1626",
     surface: "#132033",
@@ -135,7 +137,7 @@ export const THEMES = [
   {
     id: "nordic",
     name: "nordic",
-    flair: "aurora",
+    flair: "snow",
     auroraO: 0.5,
     base: "#2e3440",
     surface: "#353d4b",
@@ -202,7 +204,7 @@ export const THEMES = [
   {
     id: "mocha",
     name: "mocha",
-    flair: "aurora",
+    flair: "embers",
     auroraO: 0.7,
     base: "#151110",
     surface: "#1f1815",
@@ -243,7 +245,7 @@ export const THEMES = [
   {
     id: "dracula",
     name: "dracula",
-    flair: "aurora",
+    flair: "bubbles",
     auroraO: 0.55,
     base: "#252836",
     surface: "#2e3145",
@@ -258,6 +260,8 @@ export const THEMES = [
   {
     id: "matrix",
     name: "matrix",
+    flair: "rain",
+    auroraO: 0.8,
     base: "#0a0d0a",
     surface: "#101510",
     surfaceHi: "#182018",
@@ -457,21 +461,14 @@ export const THEMES = [
 
 export const DEFAULT_THEME = THEMES[0]
 
-/* per-theme ambient effect: which particles/motion suit the mood */
+/* per-theme ambient effect for themes without a flair layer */
 const AMBIENT = {
-  evergreen: "snow",
-  arctic: "snow",
-  nordic: "snow",
-  matrix: "rain",
   ambercrt: "scan",
   carbon: "scan",
   onedark: "motes",
   monokai: "motes",
   solarized: "motes",
-  mocha: "embers",
   gruvbox: "embers",
-  ember: "embers",
-  abyss: "bubbles",
   linen: "motes",
   studio: "motes",
 }

@@ -643,12 +643,207 @@ button {
   to { background-position: 0 0, 0 64px; }
 }
 
+/* ---------- embers flair (rising sparks) ---------- */
+
+.flair-embers {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-embers span {
+  position: absolute;
+  bottom: -4vh;
+  width: 3px;
+  height: 3px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  opacity: calc(0.7 * var(--aurora-o, 1));
+  animation: ember-rise linear infinite;
+  will-change: transform, opacity;
+}
+
+.flair-embers .e1 { left: 9%;  animation-duration: 9s;   animation-delay: 0s; }
+.flair-embers .e2 { left: 24%; animation-duration: 12s;  animation-delay: 2.4s; width: 2px; height: 2px; }
+.flair-embers .e3 { left: 43%; animation-duration: 8s;   animation-delay: 4.1s; }
+.flair-embers .e4 { left: 62%; animation-duration: 13s;  animation-delay: 1.2s; width: 2px; height: 2px; background: var(--color-accent-2); box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-accent-2) 60%, transparent); }
+.flair-embers .e5 { left: 78%; animation-duration: 10s;  animation-delay: 3.3s; }
+.flair-embers .e6 { left: 91%; animation-duration: 11s;  animation-delay: 5.2s; width: 2px; height: 2px; background: var(--color-error); box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-error) 55%, transparent); }
+
+@keyframes ember-rise {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  8%   { opacity: calc(0.75 * var(--aurora-o, 1)); }
+  40%  { transform: translate3d(3vw, -46vh, 0) rotate(160deg); }
+  70%  { opacity: calc(0.5 * var(--aurora-o, 1)); }
+  100% { transform: translate3d(-2vw, -104vh, 0) rotate(340deg); opacity: 0; }
+}
+
+/* ---------- matrix rain flair ---------- */
+
+.flair-rain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-rain span {
+  position: absolute;
+  top: -30vh;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 85%, transparent) 55%,
+    transparent
+  );
+  opacity: calc(0.55 * var(--aurora-o, 1));
+  animation: drop-fall linear infinite;
+  will-change: transform;
+}
+
+.flair-rain .r1 { left: 8%;  height: 24vh; animation-duration: 3.6s; animation-delay: 0s; }
+.flair-rain .r2 { left: 21%; height: 16vh; animation-duration: 4.4s; animation-delay: 1.4s; opacity: calc(0.35 * var(--aurora-o, 1)); }
+.flair-rain .r3 { left: 37%; height: 27vh; animation-duration: 3.1s; animation-delay: 2.3s; }
+.flair-rain .r4 { left: 52%; height: 18vh; animation-duration: 4.9s; animation-delay: 0.7s; opacity: calc(0.32 * var(--aurora-o, 1)); }
+.flair-rain .r5 { left: 68%; height: 23vh; animation-duration: 3.9s; animation-delay: 3.1s; }
+.flair-rain .r6 { left: 82%; height: 15vh; animation-duration: 4.2s; animation-delay: 1.9s; opacity: calc(0.35 * var(--aurora-o, 1)); }
+.flair-rain .r7 { left: 93%; height: 21vh; animation-duration: 3.4s; animation-delay: 2.8s; }
+
+/* ---------- bubbles flair (deep water) ---------- */
+
+.flair-bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-bubbles span {
+  position: absolute;
+  bottom: -6vh;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-accent-2) 45%, transparent);
+  background: color-mix(in srgb, var(--color-accent-2) 8%, transparent);
+  box-shadow: inset 0 0 6px -2px color-mix(in srgb, var(--color-accent-2) 60%, transparent);
+  opacity: calc(0.5 * var(--aurora-o, 1));
+  animation: bubble-rise linear infinite;
+  will-change: transform;
+}
+
+.flair-bubbles .b1 { left: 12%; width: 10px; height: 10px; animation-duration: 16s; animation-delay: 0s; }
+.flair-bubbles .b2 { left: 31%; width: 6px;  height: 6px;  animation-duration: 22s; animation-delay: 4.5s; }
+.flair-bubbles .b3 { left: 49%; width: 14px; height: 14px; animation-duration: 19s; animation-delay: 8.2s; }
+.flair-bubbles .b4 { left: 67%; width: 5px;  height: 5px;  animation-duration: 25s; animation-delay: 2.3s; }
+.flair-bubbles .b5 { left: 84%; width: 9px;  height: 9px;  animation-duration: 18s; animation-delay: 11s; }
+
+@keyframes bubble-rise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: calc(0.45 * var(--aurora-o, 1)); }
+  50%  { transform: translate3d(2.5vw, -52vh, 0); }
+  100% { transform: translate3d(-1.5vw, -110vh, 0); opacity: 0; }
+}
+
+/* ---------- snow flair ---------- */
+
+.flair-snow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-snow span {
+  position: absolute;
+  top: -5vh;
+  border-radius: 50%;
+  background: color-mix(in srgb, white 80%, var(--color-accent));
+  filter: blur(0.4px);
+  opacity: calc(0.6 * var(--aurora-o, 1));
+  animation: snow-fall linear infinite;
+  will-change: transform;
+}
+
+.flair-snow .n1 { left: 6%;  width: 4px; height: 4px; animation-duration: 13s; animation-delay: 0s;   --sway: 4vw; }
+.flair-snow .n2 { left: 19%; width: 3px; height: 3px; animation-duration: 17s; animation-delay: 3.5s; --sway: -3vw; }
+.flair-snow .n3 { left: 34%; width: 5px; height: 5px; animation-duration: 11s; animation-delay: 6.2s; --sway: 5vw; }
+.flair-snow .n4 { left: 52%; width: 3px; height: 3px; animation-duration: 19s; animation-delay: 1.8s; --sway: -4vw; }
+.flair-snow .n5 { left: 70%; width: 4px; height: 4px; animation-duration: 14s; animation-delay: 8.4s; --sway: 3vw; }
+.flair-snow .n6 { left: 88%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 4.7s; --sway: -5vw; }
+
+@keyframes snow-fall {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%   { opacity: calc(0.6 * var(--aurora-o, 1)); }
+  50%  { transform: translate3d(var(--sway), 55vh, 0); }
+  92%  { opacity: calc(0.5 * var(--aurora-o, 1)); }
+  100% { transform: translate3d(calc(var(--sway) * 0.4), 112vh, 0); opacity: 0; }
+}
+
+/* ---------- petals flair (sakura) ---------- */
+
+.flair-petals {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flair-petals span {
+  position: absolute;
+  top: -6vh;
+  width: 9px;
+  height: 9px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 62%, white),
+    color-mix(in srgb, var(--color-accent) 82%, var(--color-accent-2))
+  );
+  border-radius: 80% 0 80% 0;
+  opacity: calc(0.55 * var(--aurora-o, 1));
+  animation: petal-fall linear infinite;
+  will-change: transform;
+}
+
+.flair-petals .p1 { left: 7%;  animation-duration: 12s; animation-delay: 0s;   --sway: 7vw; }
+.flair-petals .p2 { left: 22%; animation-duration: 15s; animation-delay: 4.2s; --sway: -6vw; width: 7px; height: 7px; }
+.flair-petals .p3 { left: 38%; animation-duration: 11s; animation-delay: 7.8s; --sway: 8vw; }
+.flair-petals .p4 { left: 55%; animation-duration: 16s; animation-delay: 2.1s; --sway: -7vw; width: 7px; height: 7px; }
+.flair-petals .p5 { left: 72%; animation-duration: 13s; animation-delay: 9.6s; --sway: 6vw; }
+.flair-petals .p6 { left: 89%; animation-duration: 14s; animation-delay: 5.4s; --sway: -8vw; width: 8px; height: 8px; }
+
+@keyframes petal-fall {
+  0%   { transform: translate3d(0, -4vh, 0) rotate(0deg); opacity: 0; }
+  8%   { opacity: calc(0.55 * var(--aurora-o, 1)); }
+  25%  { transform: translate3d(var(--sway), 26vh, 0) rotate(100deg); }
+  50%  { transform: translate3d(calc(var(--sway) * -0.5), 52vh, 0) rotate(210deg); }
+  75%  { transform: translate3d(var(--sway), 78vh, 0) rotate(300deg); opacity: calc(0.45 * var(--aurora-o, 1)); }
+  100% { transform: translate3d(0, 112vh, 0) rotate(400deg); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .flair-stars span,
   .flair-mesh span,
+  .flair-embers span,
+  .flair-rain span,
+  .flair-bubbles span,
+  .flair-snow span,
+  .flair-petals span,
   .flair-grid .g-floor,
   .flair-grid .g-scan {
     animation: none;
+  }
+  .flair-embers span,
+  .flair-snow span,
+  .flair-petals span {
+    opacity: calc(0.3 * var(--aurora-o, 1));
   }
 }
 

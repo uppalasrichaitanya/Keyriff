@@ -200,6 +200,12 @@ try {
         })
         await page.screenshot({ path: path.join(SHOTS, `desktop-${theme}.png`) })
         qa[`flair_${theme}`] = flair
+        if (theme === "matrix") {
+          qa.matrixCanvas = await page.evaluate(() => {
+            const c = document.querySelector(".flair-matrix canvas")
+            return !!c && c.width > 0 && c.height > 0
+          })
+        }
       }
     }
 
@@ -245,7 +251,8 @@ const styleFailed = results.some((v) => {
   }
   if (v.qa.flair_starlight !== "flair-stars") return true
   if (v.qa.flair_vaporgrid !== "flair-grid") return true
-  if (v.qa.flair_matrix !== "flair-rain") return true
+  if (v.qa.flair_matrix !== "flair-matrix") return true
+  if (!v.qa.matrixCanvas) return true
   if (v.qa.flair_sakura !== "flair-petals") return true
   if (v.qa.flair_abyss !== "flair-bubbles") return true
   return false

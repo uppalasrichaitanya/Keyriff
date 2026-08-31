@@ -11,6 +11,7 @@ import Keyboard from "./components/Keyboard"
 import Footer from "./components/Footer"
 import TouchInput from "./components/TouchInput"
 import KbStylePicker from "./components/KbStylePicker"
+import MatrixRain from "./components/MatrixRain"
 import { isTouchDevice, buzz } from "./lib/touch"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { useTypingEngine } from "./hooks/useTypingEngine"
@@ -400,7 +401,11 @@ export default function App() {
             </>
           )}
         </div>
-        {theme.flair && (
+        {theme.flair === "matrix" ? (
+          <div className="flair-matrix" aria-hidden>
+            <MatrixRain />
+          </div>
+        ) : theme.flair && (
           <div className={theme.flair === "aurora" ? "aurora" : `flair-${theme.flair}`} aria-hidden>
             {theme.flair === "aurora" && (
               <>

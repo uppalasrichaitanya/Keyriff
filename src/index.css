@@ -643,6 +643,44 @@ button {
   to { background-position: 0 0, 0 64px; }
 }
 
+/* ---------- matrix flair (canvas digital rain) ---------- */
+
+.flair-matrix {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* deep phosphor wash so the panel tones sit in-world */
+  background:
+    radial-gradient(
+      90% 70% at 50% 30%,
+      color-mix(in srgb, #00ff41 7%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #00ff41 4%, var(--color-base)),
+      color-mix(in srgb, #02180b 92%, black)
+    );
+}
+
+.flair-matrix canvas {
+  opacity: calc(0.5 * var(--aurora-o, 1));
+}
+
+/* CRT scanline texture over the rain */
+.flair-matrix::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.22) 0 1px,
+    transparent 1px 3px
+  );
+}
+
 /* ---------- embers flair (rising sparks) ---------- */
 
 .flair-embers {
@@ -674,11 +712,13 @@ button {
 .flair-embers .e6 { left: 91%; animation-duration: 11s;  animation-delay: 5.2s; width: 2px; height: 2px; background: var(--color-error); box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-error) 55%, transparent); }
 
 @keyframes ember-rise {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
-  8%   { opacity: calc(0.75 * var(--aurora-o, 1)); }
-  40%  { transform: translate3d(3vw, -46vh, 0) rotate(160deg); }
-  70%  { opacity: calc(0.5 * var(--aurora-o, 1)); }
-  100% { transform: translate3d(-2vw, -104vh, 0) rotate(340deg); opacity: 0; }
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); opacity: 0; }
+  8%   { opacity: calc(0.8 * var(--aurora-o, 1)); }
+  22%  { transform: translate3d(2vw, -22vh, 0) rotate(80deg) scale(1.15); opacity: calc(0.5 * var(--aurora-o, 1)); }
+  38%  { transform: translate3d(3.4vw, -38vh, 0) rotate(150deg) scale(0.95); opacity: calc(0.85 * var(--aurora-o, 1)); }
+  55%  { transform: translate3d(1.4vw, -58vh, 0) rotate(230deg) scale(1.1); opacity: calc(0.4 * var(--aurora-o, 1)); }
+  72%  { transform: translate3d(2.8vw, -76vh, 0) rotate(300deg) scale(0.9); opacity: calc(0.7 * var(--aurora-o, 1)); }
+  100% { transform: translate3d(-2vw, -104vh, 0) rotate(380deg) scale(0.8); opacity: 0; }
 }
 
 /* ---------- matrix rain flair ---------- */
@@ -744,10 +784,12 @@ button {
 .flair-bubbles .b5 { left: 84%; width: 9px;  height: 9px;  animation-duration: 18s; animation-delay: 11s; }
 
 @keyframes bubble-rise {
-  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  0%   { transform: translate3d(0, 0, 0) scale(0.85); opacity: 0; }
   10%  { opacity: calc(0.45 * var(--aurora-o, 1)); }
-  50%  { transform: translate3d(2.5vw, -52vh, 0); }
-  100% { transform: translate3d(-1.5vw, -110vh, 0); opacity: 0; }
+  35%  { transform: translate3d(2.4vw, -34vh, 0) scale(1.06); }
+  50%  { opacity: calc(0.55 * var(--aurora-o, 1)); }
+  65%  { transform: translate3d(-1.8vw, -66vh, 0) scale(0.94); }
+  100% { transform: translate3d(1vw, -110vh, 0) scale(1.08); opacity: 0; }
 }
 
 /* ---------- snow flair ---------- */
@@ -780,9 +822,11 @@ button {
 
 @keyframes snow-fall {
   0%   { transform: translate3d(0, 0, 0); opacity: 0; }
-  8%   { opacity: calc(0.6 * var(--aurora-o, 1)); }
-  50%  { transform: translate3d(var(--sway), 55vh, 0); }
-  92%  { opacity: calc(0.5 * var(--aurora-o, 1)); }
+  8%   { opacity: calc(0.65 * var(--aurora-o, 1)); }
+  30%  { transform: translate3d(var(--sway), 30vh, 0); }
+  55%  { transform: translate3d(calc(var(--sway) * 0.2), 58vh, 0); opacity: calc(0.5 * var(--aurora-o, 1)); }
+  80%  { transform: translate3d(var(--sway), 88vh, 0); }
+  92%  { opacity: calc(0.45 * var(--aurora-o, 1)); }
   100% { transform: translate3d(calc(var(--sway) * 0.4), 112vh, 0); opacity: 0; }
 }
 
@@ -820,12 +864,12 @@ button {
 .flair-petals .p6 { left: 89%; animation-duration: 14s; animation-delay: 5.4s; --sway: -8vw; width: 8px; height: 8px; }
 
 @keyframes petal-fall {
-  0%   { transform: translate3d(0, -4vh, 0) rotate(0deg); opacity: 0; }
+  0%   { transform: translate3d(0, -4vh, 0) rotate(0deg) scale(0.9); opacity: 0; }
   8%   { opacity: calc(0.55 * var(--aurora-o, 1)); }
-  25%  { transform: translate3d(var(--sway), 26vh, 0) rotate(100deg); }
-  50%  { transform: translate3d(calc(var(--sway) * -0.5), 52vh, 0) rotate(210deg); }
-  75%  { transform: translate3d(var(--sway), 78vh, 0) rotate(300deg); opacity: calc(0.45 * var(--aurora-o, 1)); }
-  100% { transform: translate3d(0, 112vh, 0) rotate(400deg); opacity: 0; }
+  25%  { transform: translate3d(var(--sway), 26vh, 0) rotate(100deg) scale(1.05); }
+  50%  { transform: translate3d(calc(var(--sway) * -0.5), 52vh, 0) rotate(210deg) scale(0.92); }
+  75%  { transform: translate3d(var(--sway), 78vh, 0) rotate(300deg) scale(1.08); opacity: calc(0.45 * var(--aurora-o, 1)); }
+  100% { transform: translate3d(0, 112vh, 0) rotate(400deg) scale(0.85); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

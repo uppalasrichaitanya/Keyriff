@@ -379,7 +379,12 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-full flex-col">
         <h1 className="sr-only">typer — typing trainer</h1>
-      {theme.flair && (
+        <div className="bgfx" aria-hidden>
+          <span className="orb orb1" />
+          <span className="orb orb2" />
+          <span className="motes" />
+        </div>
+        {theme.flair && (
         <div className={theme.flair === "aurora" ? "aurora" : `flair-${theme.flair}`} aria-hidden>
           {theme.flair === "aurora" && (
             <>

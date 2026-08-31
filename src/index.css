@@ -77,6 +77,110 @@ button {
   outline-offset: 2px;
 }
 
+/* ---------- ambient futuristic backdrop (all themes) ---------- */
+
+.bgfx {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bgfx .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform;
+}
+
+.bgfx .orb1 {
+  width: 62vmax;
+  height: 62vmax;
+  left: -20vmax;
+  top: -26vmax;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent) 9%, transparent),
+    transparent 64%
+  );
+  animation: orb-a 44s ease-in-out infinite alternate;
+}
+
+.bgfx .orb2 {
+  width: 54vmax;
+  height: 54vmax;
+  right: -22vmax;
+  bottom: -28vmax;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent-2) 7%, transparent),
+    transparent 64%
+  );
+  animation: orb-b 58s ease-in-out infinite alternate;
+}
+
+@keyframes orb-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(11vmax, 9vmax, 0) scale(1.2); }
+}
+
+@keyframes orb-b {
+  from { transform: translate3d(0, 0, 0) scale(1.12); }
+  to { transform: translate3d(-13vmax, -7vmax, 0) scale(0.92); }
+}
+
+/* rising data motes — seamless one-tile loop */
+.bgfx .motes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -50%;
+  bottom: -50%;
+  background-repeat: repeat;
+  background-image:
+    radial-gradient(1.3px 1.3px at 28% 31%, color-mix(in srgb, var(--color-accent) 60%, transparent) 50%, transparent 51%),
+    radial-gradient(1px 1px at 71% 58%, color-mix(in srgb, var(--color-text) 42%, transparent) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 49% 79%, color-mix(in srgb, var(--color-accent-2) 45%, transparent) 50%, transparent 51%),
+    radial-gradient(1px 1px at 12% 12%, color-mix(in srgb, var(--color-text) 32%, transparent) 50%, transparent 51%);
+  background-size: 380px 380px;
+  opacity: 0.5;
+  animation: motes-rise 30s linear infinite;
+  will-change: transform;
+}
+
+@keyframes motes-rise {
+  from { transform: translateY(0); }
+  to { transform: translateY(-380px); }
+}
+
+[data-scheme="light"] .bgfx .orb1 {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent) 16%, transparent),
+    transparent 64%
+  );
+}
+
+[data-scheme="light"] .bgfx .orb2 {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent-2) 12%, transparent),
+    transparent 64%
+  );
+}
+
+[data-scheme="light"] .bgfx .motes {
+  opacity: 0.32;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bgfx .orb,
+  .bgfx .motes {
+    animation: none;
+  }
+}
+
 /* ---------- film grain + vignette (premium depth) ---------- */
 
 .grain {

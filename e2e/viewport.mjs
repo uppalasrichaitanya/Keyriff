@@ -133,6 +133,7 @@ try {
       const big = document.querySelector("span.tabular-nums")
       out.bigNumberPx = big ? getComputedStyle(big).fontSize : null
       out.grain = !!document.querySelector(".grain")
+      out.ambient = !!document.querySelector(".bgfx .motes")
       out.scheme = document.documentElement.dataset.scheme
       const vig = document.querySelector(".vignette")
       out.vignetteBg = vig ? getComputedStyle(vig).backgroundImage : null
@@ -223,6 +224,7 @@ console.log(JSON.stringify(report, null, 2))
 const qaFailed = results.some((v) => {
   if (!v.qa) return false
   if (!v.qa.kbFits) return true
+  if (!v.qa.ambient) return true
   if (v.name === "phone" && !(v.qa.kbScale < 1)) return true
   if (v.name === "phone" && v.qa.bigNumberPx !== "36px") return true
   if (v.name !== "phone" && v.qa.bigNumberPx !== "48px") return true

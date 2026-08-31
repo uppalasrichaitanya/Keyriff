@@ -1,16 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f6d564"/>
       <stop offset="100%" stop-color="#e2b714"/>
     </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6d564" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#e2b714" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#e2b714" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- tile -->
-  <rect width="64" height="64" rx="14" fill="url(#tile)"/>
-  <rect width="64" height="64" rx="14" fill="#ffffff" opacity="0.07"/>
-  <!-- floating ascender: the blinking caret -->
-  <rect x="27.5" y="9" width="9" height="13" rx="4.5" fill="#26282c"/>
-  <!-- letter body: crossbar + stem -->
-  <rect x="12" y="27" width="40" height="9" rx="4.5" fill="#26282c"/>
-  <rect x="27.5" y="27" width="9" height="28" rx="4.5" fill="#26282c"/>
+
+  <!-- keycap tile -->
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#1d1f23"/>
+  <rect x="1.75" y="1.75" width="60.5" height="60.5" rx="14.25" fill="none" stroke="url(#ring)" stroke-width="1.5"/>
+
+  <!-- letter t — the ascender is a blinking caret -->
+  <g filter="url(#glow)">
+    <rect x="27.5" y="9" width="9" height="13" rx="4.5" fill="url(#g)">
+      <animate attributeName="opacity" values="1;1;0.12;1;1" keyTimes="0;0.44;0.5;0.56;1" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="12" y="27" width="40" height="9" rx="4.5" fill="url(#g)"/>
+    <rect x="27.5" y="27" width="9" height="28" rx="4.5" fill="url(#g)"/>
+  </g>
 </svg>

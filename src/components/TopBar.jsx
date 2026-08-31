@@ -171,15 +171,17 @@ function TopBar({
     <header className="safe-top flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5 md:px-10">
       <div className="flex items-center gap-3 select-none">
         <motion.div
-          whileHover={{ rotate: -8, scale: 1.06 }}
+          whileHover={{ rotate: -8, scale: 1.08 }}
           transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          className="grad-accent grid h-9 w-9 place-items-center rounded-xl text-[color:var(--color-base)] shadow-accent"
+          className="shadow-accent"
         >
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="10.25" y="3.5" width="3.75" height="5" rx="1.9" />
-            <rect x="4.5" y="10.5" width="15" height="3.6" rx="1.8" />
-            <rect x="10.25" y="10.5" width="3.75" height="10.5" rx="1.9" />
-          </svg>
+          <img
+            src="/logo.svg"
+            alt=""
+            width="36"
+            height="36"
+            className="h-9 w-9 rounded-xl"
+          />
         </motion.div>
         <span className="grad-text text-2xl font-bold tracking-tight">
           typer

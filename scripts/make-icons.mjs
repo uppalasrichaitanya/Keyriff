@@ -72,25 +72,31 @@ const DARK_RECTS = [
 
 const GRAD_A = [0xf6, 0xd5, 0x64]
 const GRAD_B = [0xe2, 0xb7, 0x14]
-const DARK = [0x26, 0x28, 0x2c]
+const TILE = "#1d1f23"
 
 function sample(x, y) {
   /* returns [r, g, b, a] in design space */
-  const tile = insideRounded(x, y, 0, 0, S, S, 14)
+  const tile = insideRounded(x, y, 1, 1, S - 2, S - 2, 15)
   if (!tile) return [0, 0, 0, 0]
-  const t = (x + y) / (2 * S)
-  let r = GRAD_A[0] + (GRAD_B[0] - GRAD_A[0]) * t
-  let g = GRAD_A[1] + (GRAD_B[1] - GRAD_A[1]) * t
-  let b = GRAD_A[2] + (GRAD_B[2] - GRAD_A[2]) * t
-  r = r * 0.93 + 255 * 0.07
-  g = g * 0.93 + 255 * 0.07
-  b = b * 0.93 + 255 * 0.07
   for (const rc of DARK_RECTS) {
     if (insideRounded(x, y, rc.x, rc.y, rc.w, rc.h, rc.r)) {
-      return [DARK[0], DARK[1], DARK[2], 255]
+      /* vertical accent gradient down the letter */
+      const t =
+        rc.y === 9
+          ? y / 22
+          : rc.x === 12
+            ? (y - 27) / 9
+            : (y - 27) / 28
+      const k = Math.min(1, Math.max(0, t))
+      return [
+        Math.round(GRAD_A[0] + (GRAD_B[0] - GRAD_A[0]) * k),
+        Math.round(GRAD_A[1] + (GRAD_B[1] - GRAD_A[1]) * k),
+        Math.round(GRAD_A[2] + (GRAD_B[2] - GRAD_A[2]) * k),
+        255,
+      ]
     }
   }
-  return [r, g, b, 255]
+  return [0x1d, 0x1f, 0x23, 255]
 }
 
 function render(size) {

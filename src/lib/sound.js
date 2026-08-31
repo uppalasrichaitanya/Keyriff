@@ -244,6 +244,48 @@ const LINEAR = {
   },
 }
 
+/* crystalline glass taps with a bright ring */
+const GLASS = {
+  key({ row = 2 } = {}) {
+    const v = 0.85 + Math.random() * 0.3
+    const d = 1 - row * 0.03
+    burst({ freq: (6200 + Math.random() * 1600) * d, type: "highpass", gain: 0.13 * v, duration: 0.008 })
+    tone({ freq: (1720 + Math.random() * 320) * d, endFreq: (1180 + Math.random() * 140) * d, type: "sine", gain: 0.34 * v, duration: 0.11 })
+    tone({ freq: (2590 + Math.random() * 420) * d, type: "sine", gain: 0.12 * v, duration: 0.055 })
+    tone({ freq: (334 + Math.random() * 44) * d, endFreq: 148, type: "triangle", gain: 0.14 * v, duration: 0.028 })
+  },
+  release() {
+    burst({ freq: 5200 + Math.random() * 1400, type: "highpass", gain: 0.07, duration: 0.008 })
+    tone({ freq: 1980 + Math.random() * 260, type: "sine", gain: 0.07, duration: 0.05 })
+  },
+  space() {
+    tone({ freq: 880, endFreq: 420, type: "sine", gain: 0.3, duration: 0.14 })
+    tone({ freq: 1320, type: "sine", gain: 0.1, duration: 0.08 })
+    burst({ freq: 900, type: "lowpass", gain: 0.3, duration: 0.05 })
+    burst({ freq: 4400, type: "highpass", gain: 0.09, duration: 0.012 })
+  },
+}
+
+/* hollow bamboo clack — woody, warm, organic */
+const BAMBOO = {
+  key({ row = 2 } = {}) {
+    const v = 0.85 + Math.random() * 0.3
+    const d = 1 - row * 0.045
+    burst({ freq: (820 + Math.random() * 220) * d, type: "bandpass", q: 1.4, gain: 0.5 * v, duration: 0.045 })
+    tone({ freq: (196 + Math.random() * 26) * d, endFreq: 88 * d, type: "triangle", gain: 0.5 * v, duration: 0.07 })
+    tone({ freq: (392 + Math.random() * 40) * d, endFreq: 210, type: "sine", gain: 0.2 * v, duration: 0.04 })
+    burst({ freq: (2400 + Math.random() * 500) * d, type: "bandpass", q: 2.0, gain: 0.09 * v, duration: 0.012 })
+  },
+  release() {
+    burst({ freq: 1200 + Math.random() * 400, type: "bandpass", q: 1.5, gain: 0.1, duration: 0.016 })
+  },
+  space() {
+    tone({ freq: 150, endFreq: 56, type: "triangle", gain: 0.7, duration: 0.12 })
+    burst({ freq: 500, type: "bandpass", q: 1.2, gain: 0.42, duration: 0.06 })
+    burst({ freq: 1800, type: "bandpass", q: 1.6, gain: 0.1, duration: 0.014 })
+  },
+}
+
 export const SOUND_PACKS = [
   { id: "tactile", name: "tactile" },
   { id: "topre", name: "topre" },
@@ -252,6 +294,8 @@ export const SOUND_PACKS = [
   { id: "clicky", name: "clicky" },
   { id: "typewriter", name: "typewriter" },
   { id: "linear", name: "linear" },
+  { id: "glass", name: "glass" },
+  { id: "bamboo", name: "bamboo" },
 ]
 
 const PACKS = {
@@ -262,6 +306,8 @@ const PACKS = {
   clicky: CLICKY,
   typewriter: TYPEWRITER,
   linear: LINEAR,
+  glass: GLASS,
+  bamboo: BAMBOO,
 }
 
 export function setPack(id) {
@@ -285,8 +331,8 @@ export function playSpace() {
 
 export function playError() {
   if (!audio()) return
-  tone({ freq: 92, endFreq: 58, type: "triangle", gain: 0.44, duration: 0.09 })
-  burst({ freq: 2400, type: "bandpass", q: 0.8, gain: 0.15, duration: 0.03 })
+  tone({ freq: 118, endFreq: 76, type: "triangle", gain: 0.3, duration: 0.085 })
+  burst({ freq: 1900, type: "bandpass", q: 0.9, gain: 0.08, duration: 0.028 })
 }
 
 export function playFinish() {

@@ -162,7 +162,10 @@ try {
       await page.screenshot({ path: path.join(SHOTS, "desktop-light.png") })
 
       /* keyboard styles + flair themes */
-      for (const style of ["solid", "retro", "terminal", "low", "gummy"]) {
+      for (const style of [
+        "solid", "retro", "terminal", "low", "gummy",
+        "neon", "chrome", "ice", "artisan",
+      ]) {
         await page.evaluate((s) => {
           localStorage.setItem(
             "typer:v2:settings",
@@ -232,7 +235,10 @@ const lightFailed = results.some(
 )
 const styleFailed = results.some((v) => {
   if (!v.qa) return false
-  for (const style of ["solid", "retro", "terminal", "low", "gummy"]) {
+  for (const style of [
+    "solid", "retro", "terminal", "low", "gummy",
+    "neon", "chrome", "ice", "artisan",
+  ]) {
     if (v.qa[`kb_${style}`] !== style) return true
   }
   if (v.qa.flair_starlight !== "flair-stars") return true

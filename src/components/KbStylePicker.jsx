@@ -9,6 +9,10 @@ export const KB_STYLES = [
   { id: "terminal", name: "terminal" },
   { id: "low", name: "low profile" },
   { id: "gummy", name: "gummy" },
+  { id: "neon", name: "neon" },
+  { id: "chrome", name: "chrome" },
+  { id: "ice", name: "ice" },
+  { id: "artisan", name: "artisan" },
 ]
 
 function BoardIcon() {

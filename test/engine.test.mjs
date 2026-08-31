@@ -192,4 +192,24 @@ describe("typing engine", () => {
     expect(isTimedMode("daily")).toBe(true)
     expect(isTimedMode("words")).toBe(false)
   })
+
+  test("sound packs are unique and complete", async () => {
+    const { SOUND_PACKS } = await import("../src/lib/sound.js")
+    const ids = SOUND_PACKS.map((p) => p.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(ids.length).toBe(9)
+    expect(ids).toContain("glass")
+    expect(ids).toContain("bamboo")
+  })
+
+  test("keyboard styles are unique", async () => {
+    const { KB_STYLES } = await import("../src/components/KbStylePicker.jsx")
+    const ids = KB_STYLES.map((s) => s.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(ids.length).toBe(10)
+    expect(ids).toContain("neon")
+    expect(ids).toContain("chrome")
+    expect(ids).toContain("ice")
+    expect(ids).toContain("artisan")
+  })
 })

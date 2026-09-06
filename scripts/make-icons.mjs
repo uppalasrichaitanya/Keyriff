@@ -64,28 +64,26 @@ function insideRounded(px, py, x0, y0, w, h, r) {
   return true
 }
 
-/* TAKT mark, construction A: tapered rhythm cuts in one beam + rigid stem.
+/* KEYRIFF mark (K-cut): stroked K with rhythm interruption in the upper arm.
    PWA icons are full-bleed charcoal (OS maskable requirement) — the bare
    glyph lives in logo.svg / favicon.svg / in-app SVG. */
-const BEAM = { x: 6, y: 14, w: 52, h: 12, r: 6 }
-const STEM = { x: 27, y: 24, w: 10, h: 32, r: 5 }
-/* dovetail cutouts (black in mask space): narrow top, flared bottom */
-const CUT_POLYS = [
-  [[16.75, 19], [20.25, 19], [22.5, 27], [15.5, 27]],
-  [[29.75, 19], [33.25, 19], [35.5, 27], [28.5, 27]],
-  [[42.75, 19], [46.25, 19], [48.5, 27], [41.5, 27]],
+const STROKES = [
+  { x1: 28, y1: 10, x2: 28, y2: 54, r: 5 },
+  { x1: 28, y1: 34, x2: 42, y2: 20, r: 5 },
+  { x1: 47, y1: 15, x2: 55, y2: 8, r: 5 },
+  { x1: 34, y1: 30, x2: 54, y2: 52, r: 5 },
 ]
 
-function insidePoly(px, py, poly) {
-  let inside = false
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i]
-    const [xj, yj] = poly[j]
-    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
-      inside = !inside
-    }
-  }
-  return inside
+/* distance from point to segment <= r → inside the stroked capsule */
+function insideStroke(px, py, s) {
+  const dx = s.x2 - s.x1
+  const dy = s.y2 - s.y1
+  const len2 = dx * dx + dy * dy
+  let t = len2 === 0 ? 0 : ((px - s.x1) * dx + (py - s.y1) * dy) / len2
+  t = Math.max(0, Math.min(1, t))
+  const cx = s.x1 + t * dx
+  const cy = s.y1 + t * dy
+  return (px - cx) ** 2 + (py - cy) ** 2 <= s.r * s.r
 }
 
 const TILE_TOP = [0x1e, 0x1e, 0x24]
@@ -107,18 +105,12 @@ function sample(x, y) {
      maskable safe zones; transparency only outside the 64px canvas */
   if (x < 0 || y < 0 || x > S || y > S) return [0, 0, 0, 0]
 
-  /* monochrome mark, inset to 84% so circular masks never clip the beam
-     ends or stem foot; tile stays full-bleed beneath */
+  /* monochrome mark, inset to 84% so circular masks never clip the glyph;
+     tile stays full-bleed beneath */
   const gx = 32 + (x - 32) / 0.84
   const gy = 32 + (y - 32) / 0.84
-  if (insideRounded(gx, gy, BEAM.x, BEAM.y, BEAM.w, BEAM.h, BEAM.r)) {
-    for (const poly of CUT_POLYS) {
-      if (insidePoly(gx, gy, poly)) return [...tileColor(x, y), 255]
-    }
-    return [MARK[0], MARK[1], MARK[2], 255]
-  }
-  if (insideRounded(gx, gy, STEM.x, STEM.y, STEM.w, STEM.h, STEM.r)) {
-    return [MARK[0], MARK[1], MARK[2], 255]
+  for (const s of STROKES) {
+    if (insideStroke(gx, gy, s)) return [MARK[0], MARK[1], MARK[2], 255]
   }
 
   return [...tileColor(x, y), 255]

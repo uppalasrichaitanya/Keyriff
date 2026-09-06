@@ -261,7 +261,7 @@ export default function StatsPage({
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `takt-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `keyriff-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }

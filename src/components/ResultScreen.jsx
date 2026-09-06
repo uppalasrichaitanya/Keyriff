@@ -206,7 +206,7 @@ export default function ResultScreen({ result, onNext }) {
   const { correct, incorrect, extra, missed } = result.chars
 
   async function copyResult() {
-    const text = `takt | ${result.modeLabel} | ${result.wpm} wpm · ${result.accuracy}% acc · ${result.consistency}% consistency`
+    const text = `keyriff | ${result.modeLabel} | ${result.wpm} wpm · ${result.accuracy}% acc · ${result.consistency}% consistency`
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -231,7 +231,7 @@ export default function ResultScreen({ result, onNext }) {
       if (!ok) {
         const a = document.createElement("a")
         a.href = dataUrl
-        a.download = `takt-${Math.round(result.wpm)}wpm.png`
+        a.download = `keyriff-${Math.round(result.wpm)}wpm.png`
         a.click()
       }
       setShared(ok ? "copied!" : "saved!")

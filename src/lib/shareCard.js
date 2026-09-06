@@ -188,47 +188,30 @@ function rr(ctx, x, y, w, h, r) {
   ctx.fill()
 }
 
-/* draws the bare TAKT glyph (construction A) at (x, y) with size s.
-   No container: beam with dovetail rhythm cuts + rigid stem, in ink color.
-   Rendered on an isolated offscreen canvas so the cut knockouts can never
-   punch through the card background. */
+/* draws the bare KEYRIFF glyph (K-cut) at (x, y) with size s.
+   No container: stroked K with rhythm interruption, tinted with ink via
+   source-in on an isolated canvas, then stamped. */
 function drawLogo(ctx, x, y, s, ink) {
   const g = document.createElement("canvas")
   g.width = s
   g.height = s
   const c = g.getContext("2d")
   const k = s / 64
-  const cuts = [
-    [16.75, 20.25, 22.5, 15.5],
-    [29.75, 33.25, 35.5, 28.5],
-    [42.75, 46.25, 48.5, 41.5],
+  c.strokeStyle = "#fff"
+  c.lineWidth = 10 * k
+  c.lineCap = "round"
+  c.lineJoin = "round"
+  const segs = [
+    [28, 10, 28, 54],
+    [28, 34, 42, 20],
+    [47, 15, 55, 8],
+    [34, 30, 54, 52],
   ]
-  c.fillStyle = "#fff"
-  if (typeof c.roundRect === "function") {
+  for (const [x1, y1, x2, y2] of segs) {
     c.beginPath()
-    c.roundRect(6 * k, 14 * k, 52 * k, 12 * k, 6 * k)
-    c.fill()
-  } else {
-    c.fillRect(6 * k, 14 * k, 52 * k, 12 * k)
-  }
-  c.globalCompositeOperation = "destination-out"
-  for (const [t0, t1, b1, b0] of cuts) {
-    c.beginPath()
-    c.moveTo(t0 * k, 19 * k)
-    c.lineTo(t1 * k, 19 * k)
-    c.lineTo(b1 * k, 27 * k)
-    c.lineTo(b0 * k, 27 * k)
-    c.closePath()
-    c.fill()
-  }
-  c.globalCompositeOperation = "source-over"
-  c.fillStyle = "#fff"
-  if (typeof c.roundRect === "function") {
-    c.beginPath()
-    c.roundRect(27 * k, 24 * k, 10 * k, 32 * k, 5 * k)
-    c.fill()
-  } else {
-    c.fillRect(27 * k, 24 * k, 10 * k, 32 * k)
+    c.moveTo(x1 * k, y1 * k)
+    c.lineTo(x2 * k, y2 * k)
+    c.stroke()
   }
   /* tint the white glyph with ink via source-in, then stamp it */
   c.globalCompositeOperation = "source-in"
@@ -250,7 +233,7 @@ export async function renderShareCard(result) {
     if (document.fonts) {
       await Promise.all([
         document.fonts.load(`800 220px ${FONT}`, String(Math.round(result.wpm))),
-        document.fonts.load(`800 54px ${FONT}`, "takt"),
+        document.fonts.load(`800 54px ${FONT}`, "keyriff"),
         document.fonts.load(`700 40px ${FONT}`, "wpm"),
         document.fonts.load(`500 30px ${FONT}`, result.modeLabel),
       ])
@@ -286,7 +269,7 @@ export async function renderShareCard(result) {
   drawLogo(ctx, 64, 56, 92, t.text)
   ctx.fillStyle = t.accent
   ctx.font = `800 52px ${FONT}`
-  ctx.fillText("takt", 184, 122)
+  ctx.fillText("keyriff", 184, 122)
 
   /* PB badge */
   if (result.isPb) {

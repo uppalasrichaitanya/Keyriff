@@ -202,24 +202,24 @@ function TopBar({
             viewBox="0 0 64 64"
             className="h-[34px] w-[34px]"
             role="img"
-            aria-label="takt logo"
+            aria-label="keyriff logo"
           >
-            <defs>
-              <mask id="takt-cut">
-                <rect x="6" y="14" width="52" height="12" rx="6" fill="white" />
-                <polygon points="16.75,19 20.25,19 22.5,27 15.5,27" fill="black" />
-                <polygon points="29.75,19 33.25,19 35.5,27 28.5,27" fill="black" />
-                <polygon points="42.75,19 46.25,19 48.5,27 41.5,27" fill="black" />
-              </mask>
-            </defs>
-            <g fill="var(--color-accent)">
-              <rect x="6" y="14" width="52" height="12" rx="6" mask="url(#takt-cut)" />
-              <rect x="27" y="24" width="10" height="32" rx="5" />
+            <g
+              fill="none"
+              stroke="var(--color-accent)"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M28 10 V54" />
+              <path d="M28 34 L42 20" />
+              <path d="M47 15 L55 8" />
+              <path d="M34 30 L54 52" />
             </g>
           </svg>
         </motion.div>
         <span className="grad-text text-2xl font-bold tracking-tight">
-          takt
+          keyriff
         </span>
       </div>
 

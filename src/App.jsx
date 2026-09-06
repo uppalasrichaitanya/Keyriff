@@ -438,7 +438,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-full flex-col">
-        <h1 className="sr-only">takt — typing trainer</h1>
+        <h1 className="sr-only">keyriff — typing trainer</h1>
         <div className="bgfx" aria-hidden>
           {theme.flair !== "matrix" && (
             <>

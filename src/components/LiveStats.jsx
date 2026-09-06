@@ -149,11 +149,11 @@ function LiveStats({
 
   /* live wpm in the tab title while racing */
   useEffect(() => {
-    if (running && liveWpm > 0) document.title = `${liveWpm} wpm · takt`
+    if (running && liveWpm > 0) document.title = `${liveWpm} wpm · keyriff`
     else if (status === "idle" || status === "finished")
-      document.title = "takt"
+      document.title = "keyriff"
   }, [running, liveWpm, status])
-  useEffect(() => () => { document.title = "takt" }, [])
+  useEffect(() => () => { document.title = "keyriff" }, [])
 
   /* countdown ticks for the last three seconds of a time test */
   const prevTickRef = useRef(null)

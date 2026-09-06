@@ -15,8 +15,8 @@ export default defineConfig({
       },
       manifest: {
         id: '/',
-        name: 'takt',
-        short_name: 'takt',
+        name: 'keyriff',
+        short_name: 'keyriff',
         description: 'a beautiful way to practice typing',
         theme_color: '#0c0d10',
         background_color: '#0c0d10',

@@ -1,16 +1,16 @@
-# takt — find your rhythm
+# keyriff — find your riff
 
 A beautiful, local-first typing trainer. Everything runs and stays in your browser — no accounts, no tracking, no network.
 
 ## Showcase
 
-![takt hero — live typing run](docs/showcase/hero.gif)
+![keyriff hero — live typing run](docs/showcase/hero.gif)
 *Live test on ghost + spectre: countdown punch, momentum sparkline, streak, reactive backdrop.*
 
-![takt theme tour](docs/showcase/tour.gif)
+![keyriff theme tour](docs/showcase/tour.gif)
 *Same test across ghost, synthwave and sakura — every theme carries its own ambient animation.*
 
-![takt keyboards](docs/showcase/boards.gif)
+![keyriff keyboards](docs/showcase/boards.gif)
 *Deck, monolith and halo ring boards on midnight, mid-run.*
 
 ## Features

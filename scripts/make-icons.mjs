@@ -64,77 +64,64 @@ function insideRounded(px, py, x0, y0, w, h, r) {
   return true
 }
 
-const DARK_RECTS = [
-  { x: 27.5, y: 9, w: 9, h: 13, r: 4.5 },
-  { x: 12, y: 27, w: 40, h: 9, r: 4.5 },
-  { x: 27.5, y: 27, w: 9, h: 28, r: 4.5 },
+/* TAKT mark, construction A: tapered rhythm cuts in one beam + rigid stem.
+   PWA icons are full-bleed charcoal (OS maskable requirement) — the bare
+   glyph lives in logo.svg / favicon.svg / in-app SVG. */
+const BEAM = { x: 6, y: 14, w: 52, h: 12, r: 6 }
+const STEM = { x: 27, y: 24, w: 10, h: 32, r: 5 }
+/* dovetail cutouts (black in mask space): narrow top, flared bottom */
+const CUT_POLYS = [
+  [[16.75, 19], [20.25, 19], [22.5, 27], [15.5, 27]],
+  [[29.75, 19], [33.25, 19], [35.5, 27], [28.5, 27]],
+  [[42.75, 19], [46.25, 19], [48.5, 27], [41.5, 27]],
 ]
 
-const GRAD_A = [0xf6, 0xd5, 0x64]
-const GRAD_B = [0xe2, 0xb7, 0x14]
-
-/* gold diagonal gradient tile with a soft top shine */
-function tileColor(x, y) {
-  const t = (x + y) / (2 * S)
-  let c = [
-    GRAD_A[0] + (0xdc - GRAD_A[0]) * t,
-    GRAD_A[1] + (0xa9 - GRAD_A[1]) * t,
-    GRAD_A[2] + (0x0d - GRAD_A[2]) * t,
-  ]
-  const sy = y / S
-  if (sy < 0.42) {
-    const a = 0.3 * (1 - sy / 0.42)
-    c = [
-      c[0] + (255 - c[0]) * a,
-      c[1] + (255 - c[1]) * a,
-      c[2] + (255 - c[2]) * a,
-    ]
+function insidePoly(px, py, poly) {
+  let inside = false
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i]
+    const [xj, yj] = poly[j]
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
   }
-  return c.map((v) => Math.round(v))
+  return inside
+}
+
+const TILE_TOP = [0x1e, 0x1e, 0x24]
+const TILE_BOTTOM = [0x10, 0x10, 0x14]
+const MARK = [0xf5, 0xf5, 0xf4]
+
+/* flat charcoal tile with a barely-there vertical falloff */
+function tileColor(x, y) {
+  const t = y / S
+  return [
+    Math.round(TILE_TOP[0] + (TILE_BOTTOM[0] - TILE_TOP[0]) * t),
+    Math.round(TILE_TOP[1] + (TILE_BOTTOM[1] - TILE_TOP[1]) * t),
+    Math.round(TILE_TOP[2] + (TILE_BOTTOM[2] - TILE_TOP[2]) * t),
+  ]
 }
 
 function sample(x, y) {
-  /* returns [r, g, b, a] in design space */
-  const tile = insideRounded(x, y, 0, 0, S, S, 15)
-  if (!tile) return [0, 0, 0, 0]
+  /* returns [r, g, b, a] in design space — full-bleed charcoal for
+     maskable safe zones; transparency only outside the 64px canvas */
+  if (x < 0 || y < 0 || x > S || y > S) return [0, 0, 0, 0]
 
-  /* depth shadow under the letterform */
-  for (const rc of DARK_RECTS) {
-    if (insideRounded(x, y, rc.x, rc.y + 1.6, rc.w, rc.h, rc.r)) {
-      const c = tileColor(x, y)
-      const a = 0.4
-      return [
-        Math.round(c[0] + (0x8a - c[0]) * a),
-        Math.round(c[1] + (0x6a - c[1]) * a),
-        Math.round(c[2] + (0x08 - c[2]) * a),
-        255,
-      ]
+  /* monochrome mark, inset to 84% so circular masks never clip the beam
+     ends or stem foot; tile stays full-bleed beneath */
+  const gx = 32 + (x - 32) / 0.84
+  const gy = 32 + (y - 32) / 0.84
+  if (insideRounded(gx, gy, BEAM.x, BEAM.y, BEAM.w, BEAM.h, BEAM.r)) {
+    for (const poly of CUT_POLYS) {
+      if (insidePoly(gx, gy, poly)) return [...tileColor(x, y), 255]
     }
+    return [MARK[0], MARK[1], MARK[2], 255]
+  }
+  if (insideRounded(gx, gy, STEM.x, STEM.y, STEM.w, STEM.h, STEM.r)) {
+    return [MARK[0], MARK[1], MARK[2], 255]
   }
 
-  /* white letterform + lit caret */
-  for (const rc of DARK_RECTS) {
-    if (insideRounded(x, y, rc.x, rc.y, rc.w, rc.h, rc.r)) {
-      return rc.y === 9 ? [0xff, 0xfd, 0xf2, 255] : [255, 255, 255, 255]
-    }
-  }
-
-  /* glow near the caret tip */
-  const dx = (x - 32) / 13
-  const dy = (y - 16.5) / 11
-  const d = Math.sqrt(dx * dx + dy * dy)
-  if (d < 1) {
-    const c = tileColor(x, y)
-    const a = 0.75 * (1 - d)
-    return [
-      Math.round(c[0] + (255 - c[0]) * a),
-      Math.round(c[1] + (249 - c[1]) * a),
-      Math.round(c[2] + (224 - c[2]) * a),
-      255,
-    ]
-  }
-
-  return tileColor(x, y)
+  return [...tileColor(x, y), 255]
 }
 
 function render(size) {

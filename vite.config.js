@@ -15,11 +15,11 @@ export default defineConfig({
       },
       manifest: {
         id: '/',
-        name: 'typer',
-        short_name: 'typer',
+        name: 'takt',
+        short_name: 'takt',
         description: 'a beautiful way to practice typing',
-        theme_color: '#323437',
-        background_color: '#323437',
+        theme_color: '#0c0d10',
+        background_color: '#0c0d10',
         display: 'standalone',
         categories: ['productivity', 'utilities'],
         icons: [

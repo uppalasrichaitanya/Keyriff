@@ -41,7 +41,7 @@ const WORDS3 = { ...BASE_SETTINGS, mode: "words", wordValue: 3 }
 
 function seed(settings) {
   localStorage.setItem("typer:v2:settings", JSON.stringify(settings))
-  localStorage.setItem("typer:v2:theme", JSON.stringify("serika"))
+  localStorage.setItem("typer:v2:theme", JSON.stringify("ghost"))
 }
 
 // The engine listens for window keydown and ignores events from

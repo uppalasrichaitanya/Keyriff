@@ -1,7 +1,7 @@
 {
-  "name": "typer",
+  "name": "takt",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "icons": "node scripts/make-icons.mjs",
+    "showcase": "node scripts/capture-showcase.cjs",
     "e2e": "node e2e/viewport.mjs",
     "preview": "vite preview"
   },
@@ -26,6 +27,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "gifenc": "^1.0.3",
+    "jpeg-js": "^0.4.4",
     "jsdom": "^29.1.1",
     "oxlint": "^1.75.0",
     "puppeteer-core": "^25.8.0",

@@ -3,16 +3,11 @@ import { AnimatePresence, motion } from "framer-motion"
 import { dialogOpen, dialogClose } from "../lib/dialogs"
 
 export const KB_STYLES = [
-  { id: "laser", name: "laser" },
-  { id: "solid", name: "solid" },
-  { id: "retro", name: "retro" },
-  { id: "terminal", name: "terminal" },
-  { id: "low", name: "low profile" },
-  { id: "gummy", name: "gummy" },
-  { id: "neon", name: "neon" },
-  { id: "chrome", name: "chrome" },
-  { id: "ice", name: "ice" },
-  { id: "artisan", name: "artisan" },
+  { id: "spectre", name: "spectre" },
+  { id: "onyx", name: "onyx" },
+  { id: "deck", name: "deck" },
+  { id: "monolith", name: "monolith" },
+  { id: "halo", name: "halo ring" },
 ]
 
 function BoardIcon() {
@@ -58,7 +53,7 @@ function KbStylePicker({ value, onChange }) {
         aria-label="keyboard style"
         aria-expanded={open}
         aria-haspopup="true"
-        title="keyboard style"
+        title={`keyboard style: ${value}`}
         className={`rounded-lg p-2.5 transition-colors duration-150 ${
           open || value !== "laser" ? "text-accent" : "text-sub hover:text-text"
         }`}
@@ -88,6 +83,8 @@ function KbStylePicker({ value, onChange }) {
                     setOpen(false)
                   }}
                   aria-pressed={active}
+                  aria-selected={active}
+                  title={s.name}
                   className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm transition-colors duration-100 ${
                     active
                       ? "bg-accent/15 font-semibold text-accent"

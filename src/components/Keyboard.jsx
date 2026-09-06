@@ -198,23 +198,26 @@ function Keyboard({
                 <i className="kb-corner br" aria-hidden />
                 <i className="kb-frame-front" aria-hidden />
                 <div className="kb-rows">
-                  {ROWS.map((row, ri) => (
-                    <div key={ri} className="kb-row">
-                      {row.map((k) => (
-                        <Key
-                          key={k.code}
-                          k={k}
-                          isPressed={allPressed.has(k.code)}
-                          isGlow={
-                            glowSet.has(k.code) ||
-                            (shift && k.code.startsWith("Shift"))
-                          }
-                          isCapsLit={k.code === "CapsLock" && capsLock}
-                          heatRatio={heatMap ? (heatMap[k.code] ?? null) : null}
-                        />
-                      ))}
-                    </div>
-                  ))}
+                  {ROWS.map((row, ri) => {
+                    const renderKey = (k) => (
+                      <Key
+                        key={k.code}
+                        k={k}
+                        isPressed={allPressed.has(k.code)}
+                        isGlow={
+                          glowSet.has(k.code) ||
+                          (shift && k.code.startsWith("Shift"))
+                        }
+                        isCapsLit={k.code === "CapsLock" && capsLock}
+                        heatRatio={heatMap ? (heatMap[k.code] ?? null) : null}
+                      />
+                    )
+                    return (
+                      <div key={ri} className="kb-row">
+                        {row.map(renderKey)}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
               </div>

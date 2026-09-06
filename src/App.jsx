@@ -15,6 +15,7 @@ import MatrixRain from "./components/MatrixRain"
 import { isTouchDevice, buzz } from "./lib/touch"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { useTypingEngine } from "./hooks/useTypingEngine"
+import { useShowcase } from "./hooks/useShowcase"
 import { applyTheme, getTheme, ambientFor } from "./lib/themes"
 import { rowOfChar, colOfChar, targetsFor } from "./lib/keys"
 import { sampleWeakWords } from "./lib/engine"
@@ -80,7 +81,7 @@ export default function App() {
     "typer:v2:settings",
     DEFAULT_SETTINGS
   )
-  const [themeId, setThemeId] = useLocalStorage("typer:v2:theme", "serika")
+  const [themeId, setThemeId] = useLocalStorage("typer:v2:theme", "ghost")
   const [pbs, setPbs] = useLocalStorage("typer:v2:pbs", {})
   const [history, setHistory] = useLocalStorage("typer:v2:history", [])
   const [keyStats, setKeyStats] = useLocalStorage("typer:v2:keystats", {})
@@ -117,9 +118,26 @@ export default function App() {
     applyTheme(themeId)
   }, [themeId])
 
+  /* pause ambient animations when tab hidden (perf) */
   useEffect(() => {
-    document.documentElement.dataset.kb = settings.kbStyle ?? "laser"
-  }, [settings.kbStyle])
+    const onVis = () => {
+      document.querySelector(".bgfx")?.classList.toggle("paused", document.hidden)
+    }
+    document.addEventListener("visibilitychange", onVis)
+    return () => document.removeEventListener("visibilitychange", onVis)
+  }, [])
+
+  /* single source of truth for the board: CSS dataset + JSX geometry
+     can never disagree (stale saves fall back to laser everywhere) */
+  const kbStyle = ["laser", "spectre", "onyx", "deck", "monolith", "halo"].includes(
+    settings.kbStyle
+  )
+    ? settings.kbStyle
+    : "laser"
+
+  useEffect(() => {
+    document.documentElement.dataset.kb = kbStyle
+  }, [kbStyle])
 
   useEffect(() => {
     setSoundEnabled(settings.sound)
@@ -202,6 +220,9 @@ export default function App() {
   })
 
   const { handleKeyDown, restart: engineRestart, status: engineStatus } = engine
+
+  /* ?showcase autoplay demo mode (README footage + live demo) */
+  useShowcase({ engine, setThemeId, setSettings, setSeenIntro, setScreen })
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
@@ -368,7 +389,45 @@ export default function App() {
     errorTick,
     capsLock,
     series,
+    rollingWpm,
   } = engine
+
+  /* living background: ease --typing-energy toward rolling speed so the
+     backdrop charges while racing, simmers when keystrokes stall mid-run,
+     and decays to calm at idle/finish. The loop sleeps once settled. */
+  const energyRef = useRef({ value: 0, typed: null, at: 0 })
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.style.setProperty("--typing-energy", "0")
+      return
+    }
+    const st8 = energyRef.current
+    if (typed !== st8.typed) {
+      st8.typed = typed
+      st8.at = performance.now()
+    }
+    let raf = 0
+    const tick = () => {
+      const stalled = performance.now() - st8.at > 2500
+      const target =
+        status !== "running"
+          ? 0
+          : stalled
+            ? 0.15
+            : Math.min(1, Math.max(0, (rollingWpm ?? 0) / 120))
+      const next = st8.value + (target - st8.value) * 0.1
+      if (Math.abs(next - target) < 0.004) {
+        st8.value = target
+        document.documentElement.style.setProperty("--typing-energy", target.toFixed(3))
+        return
+      }
+      st8.value = next
+      document.documentElement.style.setProperty("--typing-energy", next.toFixed(3))
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [typed, status, rollingWpm])
 
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
@@ -379,11 +438,15 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-full flex-col">
-        <h1 className="sr-only">typer — typing trainer</h1>
+        <h1 className="sr-only">takt — typing trainer</h1>
         <div className="bgfx" aria-hidden>
-          <span className="orb orb1" />
-          <span className="orb orb2" />
-          {ambientFor(theme.id) === "motes" && <span className="motes" />}
+          {theme.flair !== "matrix" && (
+            <>
+              <span className="orb orb1" style={theme.flair ? { opacity: 0.55 } : undefined} />
+              <span className="orb orb2" style={theme.flair ? { opacity: 0.55 } : undefined} />
+            </>
+          )}
+          {theme.flair !== "matrix" && ambientFor(theme.id) === "motes" && <span className="motes" />}
           {ambientFor(theme.id) === "embers" && <span className="motes embers" />}
           {ambientFor(theme.id) === "snow" && <span className="motes snow" />}
           {ambientFor(theme.id) === "bubbles" && (
@@ -419,6 +482,7 @@ export default function App() {
                 <span className="s1" />
                 <span className="s2" />
                 <span className="s3" />
+                {theme.id === "ghost" && <span className="s4" />}
               </>
             )}
             {theme.flair === "mesh" && (
@@ -445,6 +509,8 @@ export default function App() {
                 <span className="e4" />
                 <span className="e5" />
                 <span className="e6" />
+                <span className="e7" />
+                <span className="e8" />
               </>
             )}
             {theme.flair === "rain" && (
@@ -456,6 +522,8 @@ export default function App() {
                 <span className="r5" />
                 <span className="r6" />
                 <span className="r7" />
+                <span className="r8" />
+                <span className="r9" />
               </>
             )}
             {theme.flair === "bubbles" && (
@@ -465,6 +533,8 @@ export default function App() {
                 <span className="b3" />
                 <span className="b4" />
                 <span className="b5" />
+                <span className="b6" />
+                <span className="b7" />
               </>
             )}
             {theme.flair === "snow" && (
@@ -475,6 +545,8 @@ export default function App() {
                 <span className="n4" />
                 <span className="n5" />
                 <span className="n6" />
+                <span className="n7" />
+                <span className="n8" />
               </>
             )}
             {theme.flair === "petals" && (
@@ -485,6 +557,8 @@ export default function App() {
                 <span className="p4" />
                 <span className="p5" />
                 <span className="p6" />
+                <span className="p7" />
+                <span className="p8" />
               </>
             )}
           </div>
@@ -509,11 +583,11 @@ export default function App() {
           zen ? "max-w-5xl" : "max-w-4xl"
         }`}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {screen === "test" ? (
             <motion.div
               key="test"
-              {...screenMotion()}
+              {...screenMotion("test")}
               className={`flex flex-col ${zen ? "gap-4" : "gap-9"}`}
             >
               {!zen && (
@@ -680,7 +754,7 @@ export default function App() {
               </div>
             </motion.div>
           ) : screen === "stats" ? (
-            <motion.div key="stats" {...screenMotion()}>
+            <motion.div key="stats" {...screenMotion("stats")}>
               <StatsPage
                 history={history}
                 pbs={pbs}
@@ -695,7 +769,7 @@ export default function App() {
             </motion.div>
           ) : (
             lastResult && (
-              <motion.div key="result" {...screenMotion()}>
+              <motion.div key="result" {...screenMotion("result")}>
                 <ResultScreen result={lastResult} onNext={nextTest} />
               </motion.div>
             )

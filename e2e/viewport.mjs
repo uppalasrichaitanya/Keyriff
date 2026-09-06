@@ -133,7 +133,7 @@ try {
       const big = document.querySelector("span.tabular-nums")
       out.bigNumberPx = big ? getComputedStyle(big).fontSize : null
       out.grain = !!document.querySelector(".grain")
-      out.ambient = !!document.querySelector(".bgfx .motes")
+      out.ambient = !!document.querySelector(".bgfx .motes, .bgfx .scan, .bgfx .drop")
       out.scheme = document.documentElement.dataset.scheme
       const vig = document.querySelector(".vignette")
       out.vignetteBg = vig ? getComputedStyle(vig).backgroundImage : null
@@ -163,10 +163,7 @@ try {
       await page.screenshot({ path: path.join(SHOTS, "desktop-light.png") })
 
       /* keyboard styles + flair themes */
-      for (const style of [
-        "solid", "retro", "terminal", "low", "gummy",
-        "neon", "chrome", "ice", "artisan",
-      ]) {
+      for (const style of ["spectre", "onyx", "deck", "monolith", "halo"]) {
         await page.evaluate((s) => {
           localStorage.setItem(
             "typer:v2:settings",
@@ -243,10 +240,8 @@ const lightFailed = results.some(
 )
 const styleFailed = results.some((v) => {
   if (!v.qa) return false
-  for (const style of [
-    "solid", "retro", "terminal", "low", "gummy",
-    "neon", "chrome", "ice", "artisan",
-  ]) {
+  if (v.qa.kb_laser === undefined) return false
+  for (const style of ["spectre", "onyx", "deck", "monolith", "halo"]) {
     if (v.qa[`kb_${style}`] !== style) return true
   }
   if (v.qa.flair_starlight !== "flair-stars") return true

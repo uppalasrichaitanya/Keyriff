@@ -11,11 +11,12 @@ const container = {
 }
 
 const item = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 26, scale: 0.94 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 260, damping: 26 },
+    scale: 1,
+    transition: { type: "spring", stiffness: 300, damping: 21 },
   },
 }
 
@@ -27,20 +28,70 @@ function CrownIcon() {
   )
 }
 
-function BigStat({ value, decimals = 0, suffix = "", label, accent }) {
+function BigStat({ value, decimals = 0, suffix = "", label, accent, hero }) {
   const shown = useCountUp(value, { decimals })
   return (
     <div>
-      <div
+      <motion.div
+        layoutId={hero ? "hero-wpm" : undefined}
+        transition={{ type: "spring", stiffness: 320, damping: 30 }}
         className={`text-5xl font-extrabold tabular-nums sm:text-6xl ${
-          accent ? "grad-text" : "text-text"
+          accent ? "grad-text shimmer-text drop-shadow-sm" : "text-text"
         }`}
       >
         {shown}
         <span className="text-3xl">{suffix}</span>
-      </div>
+      </motion.div>
       <div className="mt-1 text-sm font-medium text-sub">{label}</div>
     </div>
+  )
+}
+
+/* PB particle burst — kokonutui particle-button technique adapted:
+   theme-colored particles fountain from the badge on mount. */
+function PbBurst() {
+  const [parts, setParts] = useState(null)
+
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return
+    const cs = getComputedStyle(document.documentElement)
+    const colors = [
+      cs.getPropertyValue("--color-accent").trim() || "#e2b714",
+      cs.getPropertyValue("--color-accent-2").trim() || "#e2b714",
+      cs.getPropertyValue("--color-text").trim() || "#d6d6d7",
+    ]
+    setParts(
+      Array.from({ length: 14 }, (_, i) => ({
+        id: i,
+        x: (i % 2 ? 1 : -1) * (24 + Math.random() * 64),
+        y: -(30 + Math.random() * 70),
+        size: 3 + Math.random() * 5,
+        color: colors[i % colors.length],
+        round: Math.random() > 0.4,
+        delay: i * 0.035,
+      }))
+    )
+  }, [])
+
+  if (!parts) return null
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      {parts.map((p) => (
+        <motion.span
+          key={p.id}
+          className="absolute left-1/2 top-1/2"
+          style={{
+            width: p.size,
+            height: p.round ? p.size : p.size * 0.45,
+            background: p.color,
+            borderRadius: p.round ? "50%" : "2px",
+          }}
+          initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+          animate={{ scale: [0, 1, 0], x: [0, p.x], y: [0, p.y], opacity: [1, 1, 0] }}
+          transition={{ duration: 0.7, delay: 0.45 + p.delay, ease: "easeOut" }}
+        />
+      ))}
+    </span>
   )
 }
 
@@ -56,6 +107,45 @@ function SmallStat({ label, children }) {
 function CountUpStat({ label, value, decimals = 0, suffix = "" }) {
   const shown = useCountUp(value, { decimals })
   return <SmallStat label={label}>{shown}{suffix}</SmallStat>
+}
+
+/* consistency ring gauge — bklit ring-chart pattern hand-rolled:
+   animated accent arc over a muted track with the value centered */
+function ConsistencyRing({ value }) {
+  const R = 30
+  const C = 2 * Math.PI * R
+  const frac = Math.min(1, Math.max(0, value / 100))
+  return (
+    <div className="flex flex-col items-center gap-1" role="img" aria-label={`consistency ${Math.round(value)} percent`}>
+      <div className="relative h-[76px] w-[76px]">
+        <svg width="76" height="76" viewBox="0 0 76 76" className="-rotate-90">
+          <circle cx="38" cy="38" r={R} fill="none" stroke="var(--color-surface-hi)" strokeWidth="7" />
+          <motion.circle
+            cx="38"
+            cy="38"
+            r={R}
+            fill="none"
+            stroke="var(--color-accent)"
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeDasharray={C}
+            initial={{ strokeDashoffset: C }}
+            animate={{ strokeDashoffset: C * (1 - frac) }}
+            transition={{ duration: 1.1, ease: "easeOut", delay: 0.5 }}
+            style={{
+              filter:
+                "drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent) 45%, transparent))",
+            }}
+          />
+        </svg>
+        <span className="absolute inset-0 grid place-items-center text-base font-bold tabular-nums text-text">
+          {Math.round(value)}
+          <span className="text-[10px] font-semibold text-sub">%</span>
+        </span>
+      </div>
+      <span className="text-sm font-medium text-sub">consistency</span>
+    </div>
+  )
 }
 
 function Confetti() {
@@ -116,7 +206,7 @@ export default function ResultScreen({ result, onNext }) {
   const { correct, incorrect, extra, missed } = result.chars
 
   async function copyResult() {
-    const text = `typer | ${result.modeLabel} | ${result.wpm} wpm · ${result.accuracy}% acc · ${result.consistency}% consistency`
+    const text = `takt | ${result.modeLabel} | ${result.wpm} wpm · ${result.accuracy}% acc · ${result.consistency}% consistency`
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -141,7 +231,7 @@ export default function ResultScreen({ result, onNext }) {
       if (!ok) {
         const a = document.createElement("a")
         a.href = dataUrl
-        a.download = `typer-${Math.round(result.wpm)}wpm.png`
+        a.download = `takt-${Math.round(result.wpm)}wpm.png`
         a.click()
       }
       setShared(ok ? "copied!" : "saved!")
@@ -177,8 +267,9 @@ export default function ResultScreen({ result, onNext }) {
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 18, delay: 0.45 }}
-            className="animate-pop flex items-center gap-1.5 rounded-md bg-accent/15 px-3 py-1.5 text-sm font-semibold text-accent"
+            className="animate-pop relative flex items-center gap-1.5 rounded-md bg-accent/15 px-3 py-1.5 text-sm font-semibold text-accent"
           >
+            <PbBurst />
             <CrownIcon />
             new personal best
             {result.prevPb && (
@@ -205,7 +296,7 @@ export default function ResultScreen({ result, onNext }) {
 
       <motion.div
         variants={item}
-        className="glass relative flex flex-wrap items-start justify-between gap-8 overflow-hidden rounded-2xl bg-surface px-7 py-6"
+        className="glass glass-luxe relative flex flex-wrap items-start justify-between gap-8 overflow-hidden rounded-2xl border border-accent/20 bg-surface px-7 py-6 shadow-accent"
       >
         {result.isPb && (
           <motion.div
@@ -220,9 +311,10 @@ export default function ResultScreen({ result, onNext }) {
             transition={{ duration: 1.5, ease: "easeOut", delay: 0.35 }}
           />
         )}
-        <div className="relative flex gap-6 sm:gap-10">
-          <BigStat value={result.wpm} label="wpm" accent />
+        <div className="relative flex items-center gap-6 sm:gap-10">
+          <BigStat value={result.wpm} label="wpm" accent hero />
           <BigStat value={result.accuracy} decimals={1} suffix="%" label="accuracy" />
+          <ConsistencyRing value={result.consistency} />
         </div>
         <div className="relative flex min-w-56 flex-col gap-1.5">
           <CountUpStat label="raw" value={result.rawWpm} />
@@ -248,11 +340,11 @@ export default function ResultScreen({ result, onNext }) {
         </div>
       </motion.div>
 
-      <motion.div variants={item} className="glass rounded-2xl bg-surface p-4 pt-3">
+      <motion.div variants={item} className="glass rounded-2xl border border-sub/15 bg-surface p-4 pt-3">
         <TypingReplay result={result} />
       </motion.div>
 
-      <motion.div variants={item} className="glass rounded-2xl bg-surface p-4 pt-3">
+      <motion.div variants={item} className="glass rounded-2xl border border-sub/15 bg-surface p-4 pt-3">
         <WpmChart
           history={result.history}
           pbWpm={result.prevPb ? result.prevPb.wpm : null}

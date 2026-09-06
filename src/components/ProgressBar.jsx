@@ -12,12 +12,17 @@ function ProgressBar({ subscribeClock, getClock, getLimit, wordCount, typedCount
   const remaining = limitMs - elapsed
   const urgent = timed && elapsed > 0 && remaining <= 5000 && remaining > -1000
   return (
-    <div className="mx-auto mt-2 h-[3px] w-[96%] overflow-hidden rounded-full bg-surface-hi/50">
+    <div className="mx-auto mt-2 h-[4px] w-[96%] overflow-hidden rounded-full bg-surface-hi/50">
       <div
         className={`h-full w-full origin-left rounded-full transition-[background-color] duration-200 ${
-          urgent ? "bg-error" : "bg-accent"
+          urgent ? "bg-error" : ""
         }`}
-        style={{ transform: `scaleX(${Math.min(1, Math.max(0, ratio))})` }}
+        style={{
+          transform: `scaleX(${Math.min(1, Math.max(0, ratio))})`,
+          backgroundImage: urgent
+            ? undefined
+            : "linear-gradient(90deg, var(--color-accent), var(--color-accent-2))",
+        }}
       />
     </div>
   )

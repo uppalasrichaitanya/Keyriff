@@ -168,14 +168,14 @@ function ConfigBar({ settings, onChange }) {
                 active={settings.punctuation}
                 onClick={() => set({ punctuation: !settings.punctuation })}
               >
-                @ punctuation
+                punctuation
               </Pill>
               <Pill
                 label="numbers"
                 active={settings.numbers}
                 onClick={() => set({ numbers: !settings.numbers })}
               >
-                # numbers
+                numbers
               </Pill>
 
               <Divider />
@@ -188,7 +188,7 @@ function ConfigBar({ settings, onChange }) {
           active={settings.mode === "time"}
           onClick={() => set({ mode: "time" })}
         >
-          clock time
+          time
         </Pill>
         <Pill
           group="cfg-mode"
@@ -196,7 +196,7 @@ function ConfigBar({ settings, onChange }) {
           active={settings.mode === "words"}
           onClick={() => set({ mode: "words" })}
         >
-          abc words
+          words
         </Pill>
         <Pill
           group="cfg-mode"
@@ -204,7 +204,7 @@ function ConfigBar({ settings, onChange }) {
           active={settings.mode === "quote"}
           onClick={() => set({ mode: "quote" })}
         >
-          ❝ quotes
+          quotes
         </Pill>
         <Pill
           group="cfg-mode"
@@ -212,7 +212,7 @@ function ConfigBar({ settings, onChange }) {
           active={settings.mode === "daily"}
           onClick={() => set({ mode: "daily" })}
         >
-          ◉ daily
+          daily
         </Pill>
         <Pill
           group="cfg-mode"
@@ -220,7 +220,7 @@ function ConfigBar({ settings, onChange }) {
           active={isCustom}
           onClick={handleCustomClick}
         >
-          ✎ custom
+          custom
         </Pill>
 
         <Divider />
@@ -248,7 +248,7 @@ function ConfigBar({ settings, onChange }) {
           active={!!settings.suddenDeath}
           onClick={() => set({ suddenDeath: !settings.suddenDeath })}
         >
-          ☠ sudden
+          sudden death
         </Pill>
 
         <Pill
@@ -256,7 +256,7 @@ function ConfigBar({ settings, onChange }) {
           active={!!settings.forceCorrect}
           onClick={() => set({ forceCorrect: !settings.forceCorrect })}
         >
-          ✓ fix first
+          fix first
         </Pill>
 
         {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (

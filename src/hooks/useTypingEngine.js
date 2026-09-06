@@ -412,6 +412,14 @@ export function useTypingEngine(settings, handlers = {}) {
     [clockRef]
   )
 
+  /* REACTIVE AMBIENCE: rolling speed for backdrop energy.
+     Average raw wpm of the last 3 series entries; 0 when idle/finished/empty. */
+  const rollingWpm =
+    status !== "running" || series.length === 0
+      ? 0
+      : series.slice(-3).reduce((acc, e) => acc + (e?.raw ?? 0), 0) /
+        Math.min(3, series.length)
+
   return {
     words,
     typed,
@@ -420,6 +428,7 @@ export function useTypingEngine(settings, handlers = {}) {
     errorTick,
     capsLock,
     series,
+    rollingWpm,
     handleKeyDown,
     dispatchKey,
     restart,

@@ -16,10 +16,12 @@ function BoltIcon() {
   )
 }
 
-/* memoized: only redraws when the series gains a second */
+/* memoized: only redraws when the series gains a second.
+   bklit live-line pattern: momentum-colored line (up = accent, fading =
+   error), pulsing live tip + value badge. */
 const Spark = memo(function Spark({ series }) {
-  const W = 150
-  const H = 42
+  const W = 180
+  const H = 48
   const maxW = Math.max(30, ...series.map((p) => p.wpm)) * 1.15
   const pts = series.map((p, i) => [
     (i / Math.max(1, series.length - 1)) * (W - 6) + 3,
@@ -30,6 +32,12 @@ const Spark = memo(function Spark({ series }) {
     .join(" ")
   const last = pts[pts.length - 1]
   const area = `${path} L${last[0].toFixed(1)},${H} L3,${H} Z`
+  /* momentum: average of last 3s vs first 3s */
+  const head = series.slice(0, 3).reduce((a, p) => a + p.wpm, 0) / Math.min(3, series.length)
+  const tail = series.slice(-3).reduce((a, p) => a + p.wpm, 0) / Math.min(3, series.length)
+  const up = tail >= head
+  const line = up ? "var(--color-accent)" : "var(--color-error)"
+  const liveWpm = series[series.length - 1]?.wpm ?? 0
 
   return (
     <motion.svg
@@ -45,22 +53,36 @@ const Spark = memo(function Spark({ series }) {
           <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.3" />
           <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
         </linearGradient>
+        <linearGradient id="sparkFillDown" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-error)" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="var(--color-error)" stopOpacity="0" />
+        </linearGradient>
       </defs>
-      <path d={area} fill="url(#sparkFill)" />
+      <path d={area} fill={up ? "url(#sparkFill)" : "url(#sparkFillDown)"} />
       <path
         d={path}
         fill="none"
-        stroke="var(--color-accent)"
+        stroke={line}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <text
+        x={Math.min(last[0] + 6, W - 24)}
+        y={Math.max(last[1] - 4, 10)}
+        fontSize="10"
+        fontWeight="700"
+        fill="var(--color-sub)"
+        textAnchor="start"
+      >
+        {liveWpm}
+      </text>
       <motion.circle
         cx={last[0]}
         cy={last[1]}
         r="3"
-        fill="var(--color-accent)"
-        animate={{ opacity: [1, 0.45, 1] }}
+        fill={line}
+        animate={{ opacity: [1, 0.45, 1], r: [3, 4, 3] }}
         transition={{ duration: 1.4, repeat: Infinity }}
       />
     </motion.svg>
@@ -121,14 +143,17 @@ function LiveStats({
   const liveAcc =
     totalTyped > 0 ? Math.round((stats.correct / totalTyped) * 100) : 100
   const running = status === "running"
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true
 
   /* live wpm in the tab title while racing */
   useEffect(() => {
-    if (running && liveWpm > 0) document.title = `${liveWpm} wpm · typer`
+    if (running && liveWpm > 0) document.title = `${liveWpm} wpm · takt`
     else if (status === "idle" || status === "finished")
-      document.title = "typer"
+      document.title = "takt"
   }, [running, liveWpm, status])
-  useEffect(() => () => { document.title = "typer" }, [])
+  useEffect(() => () => { document.title = "takt" }, [])
 
   /* countdown ticks for the last three seconds of a time test */
   const prevTickRef = useRef(null)
@@ -163,12 +188,21 @@ function LiveStats({
       <AnimatePresence mode="wait">
         {big != null ? (
           <motion.span
-            key="live"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            key={big}
+            layoutId="hero-wpm"
+            initial={
+              prefersReduced
+                ? { opacity: 0, y: 8 }
+                : { opacity: 0, scale: 1.28, y: 6 }
+            }
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="text-4xl font-extrabold tabular-nums text-accent sm:text-5xl"
+            transition={
+              prefersReduced
+                ? { duration: 0.15 }
+                : { type: "spring", stiffness: 550, damping: 24 }
+            }
+            className="text-4xl font-black tabular-nums tracking-tight grad-text drop-shadow sm:text-5xl"
           >
             {big}
           </motion.span>

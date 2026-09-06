@@ -33,6 +33,33 @@ export default function WpmChart({ history, pbWpm = null }) {
 
   const wpmLine = buildLine("wpm")
   const rawLine = buildLine("raw")
+  /* profit/loss coloring: split the wpm line into above/below-PB runs so
+     beating your best reads accent and trailing reads muted */
+  const wpmRuns = (() => {
+    if (pbWpm == null || pbWpm <= 0) return [{ d: wpmLine, above: true }]
+    const runs = []
+    let cur = []
+    let curAbove = null
+    const flush = () => {
+      if (cur.length > 1) runs.push({ d: cur.join(" "), above: curAbove })
+      else if (cur.length === 1) runs.push({ d: cur.join(" "), above: curAbove })
+    }
+    history.forEach((p, i) => {
+      const above = p.wpm >= pbWpm
+      const seg = `${i === 0 || above !== curAbove ? "M" : "L"}${sx(p.t).toFixed(1)},${sy(p.wpm).toFixed(1)}`
+      if (i > 0 && above !== curAbove) {
+        /* bridge the crossing so runs stay continuous */
+        cur.push(seg.replace(/^M/, "L"))
+        flush()
+        cur = [seg]
+      } else {
+        cur.push(seg)
+      }
+      curAbove = above
+    })
+    flush()
+    return runs
+  })()
   const areaPath = `${wpmLine} L${sx(history[history.length - 1].t).toFixed(1)},${H - PAD_B} L${PAD_L},${H - PAD_B} Z`
 
   const tickStep = Math.max(1, Math.ceil(maxX / 8 / 5) * 5)
@@ -109,21 +136,29 @@ export default function WpmChart({ history, pbWpm = null }) {
         transition={{ duration: 1.1, ease: "easeInOut" }}
       />
 
-      <motion.path
-        d={wpmLine}
-        fill="none"
-        stroke="var(--color-accent)"
-        strokeWidth="2.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{
-          filter:
-            "drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 40%, transparent))",
-        }}
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.1, ease: "easeInOut" }}
-      />
+      {wpmRuns.map((run, i) => (
+        <motion.path
+          key={i}
+          d={run.d}
+          fill="none"
+          stroke={run.above ? "var(--color-accent)" : "var(--color-sub)"}
+          strokeOpacity={run.above ? 1 : 0.75}
+          strokeWidth="2.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={
+            run.above
+              ? {
+                  filter:
+                    "drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 40%, transparent))",
+                }
+              : undefined
+          }
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1.1, ease: "easeInOut" }}
+        />
+      ))}
 
       {pbWpm != null && pbWpm > 0 && pbWpm < maxY && (
         <motion.g

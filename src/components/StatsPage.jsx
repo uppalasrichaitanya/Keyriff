@@ -42,6 +42,99 @@ function charsOf(r) {
     : 0
 }
 
+/* activity heatmap: last 12 weeks of typing days, bklit-heatmap pattern
+   hand-rolled — intensity scales with tests per day, tooltips via title */
+const HEAT_WEEKS = 12
+
+function ActivityHeatmap({ history }) {
+  const weeks = useMemo(() => {
+    const counts = {}
+    for (const r of history) {
+      const d = new Date(r.timestamp)
+      d.setHours(0, 0, 0, 0)
+      const k = d.getTime()
+      counts[k] = (counts[k] || 0) + 1
+    }
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    /* start on the Sunday 11 weeks ago so columns are full weeks */
+    const start = new Date(today)
+    start.setDate(start.getDate() - ((HEAT_WEEKS - 1) * 7 + today.getDay()))
+    const cols = []
+    let max = 1
+    for (let w = 0; w < HEAT_WEEKS; w++) {
+      const days = []
+      for (let d = 0; d < 7; d++) {
+        const date = new Date(start)
+        date.setDate(start.getDate() + w * 7 + d)
+        const future = date.getTime() > today.getTime()
+        const n = future ? -1 : counts[date.getTime()] || 0
+        if (n > max) max = n
+        days.push({ date, n })
+      }
+      cols.push(days)
+    }
+    return { cols, max }
+  }, [history])
+
+  return (
+    <motion.div
+      variants={item}
+      className="glass glass-luxe rounded-2xl bg-surface p-4 pt-3"
+    >
+      <div className="mb-2 flex items-baseline justify-between px-1">
+        <span className="text-sm font-medium text-sub">activity</span>
+        <span className="flex items-center gap-1 text-[10px] text-sub">
+          less
+          {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+            <span
+              key={f}
+              className="h-2.5 w-2.5 rounded-[3px]"
+              style={{
+                background:
+                  f === 0
+                    ? "var(--color-surface-hi)"
+                    : `color-mix(in srgb, var(--color-accent) ${Math.round(f * 100)}%, var(--color-surface-hi))`,
+              }}
+            />
+          ))}
+          more
+        </span>
+      </div>
+      <div
+        className="grid auto-cols-min grid-flow-col justify-start gap-1 overflow-x-auto px-1 pb-1"
+        role="img"
+        aria-label="typing activity over the last 12 weeks"
+      >
+        {weeks.cols.map((days, wi) => (
+          <div key={wi} className="grid grid-rows-7 gap-1">
+            {days.map(({ date, n }, di) => (
+              <span
+                key={di}
+                title={
+                  n < 0
+                    ? date.toLocaleDateString()
+                    : `${date.toLocaleDateString()} — ${n} test${n === 1 ? "" : "s"}`
+                }
+                className="h-2.5 w-2.5 rounded-[3px]"
+                style={{
+                  background:
+                    n <= 0
+                      ? "var(--color-surface-hi)"
+                      : `color-mix(in srgb, var(--color-accent) ${Math.round(
+                          25 + (n / weeks.max) * 75
+                        )}%, var(--color-surface-hi))`,
+                  opacity: n < 0 ? 0.35 : 1,
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
 const container = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
@@ -168,7 +261,7 @@ export default function StatsPage({
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `typer-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `takt-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -261,13 +354,15 @@ export default function StatsPage({
 
           <motion.div
             variants={item}
-            className="glass rounded-2xl bg-surface p-4 pt-3"
+            className="glass glass-luxe rounded-2xl bg-surface p-4 pt-3"
           >
             <div className="mb-1 px-1 text-sm font-medium text-sub">
               wpm progression
             </div>
             <ProgressChart data={ordered} />
           </motion.div>
+
+          <ActivityHeatmap history={history} />
 
           {weakKeys.length > 0 && (
             <motion.div variants={item} className="flex flex-col gap-2">
@@ -301,9 +396,9 @@ export default function StatsPage({
                         style={{
                           width: `${k.acc}%`,
                           background:
-                            k.acc < 85
-                              ? "var(--color-error)"
-                              : "color-mix(in srgb, var(--color-error) 55%, var(--color-accent))",
+                            k.acc >= 95
+                              ? "var(--color-accent)"
+                              : "var(--color-error)",
                         }}
                       />
                     </div>
@@ -351,7 +446,7 @@ export default function StatsPage({
                 {recent.map((r, i) => (
                   <div
                     key={`${r.timestamp}-${i}`}
-                    className="flex items-center justify-between px-4 py-2.5 text-sm"
+                    className="flex items-center justify-between rounded px-4 py-2.5 text-sm hover:bg-surface-hi/50"
                   >
                     <div className="min-w-0">
                       <div className="truncate font-medium text-text">

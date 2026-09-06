@@ -28,12 +28,12 @@ const SIZE_CLASSES = {
 
 /* one word row — memoized so a keystroke only re-renders the
    words whose typed content actually changed */
-const Word = memo(function Word({ w, input }) {
+const Word = memo(function Word({ w, input, isDone }) {
   return (
     <span
       className={`relative whitespace-nowrap ${
         input === undefined ? "text-sub" : ""
-      }`}
+      }${isDone ? " opacity-85" : ""}`}
     >
       {w.split("").map((ch, ci) => {
         const t = input?.[ci]
@@ -42,7 +42,7 @@ const Word = memo(function Word({ w, input }) {
             ? "text-sub"
             : t === ch
               ? "text-text"
-              : "text-error"
+              : "text-error underline decoration-error underline-offset-4"
         return (
           <span key={ci} data-ci={ci} className="inline-block align-top">
             <span className={cls}>{ch}</span>
@@ -228,7 +228,7 @@ function TypingTest({
           }`}
         >
           {words.map((w, wi) => (
-            <Word key={wi} w={w} input={typed[wi]} />
+            <Word key={wi} w={w} input={typed[wi]} isDone={wi < typed.length - 1} />
           ))}
 
           <Caret

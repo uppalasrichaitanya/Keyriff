@@ -126,8 +126,29 @@ function VolumeControl({ sound, volume, pack, onToggleSound, onVolume, onPackCha
                 aria-label="volume level"
                 className="w-full cursor-pointer accent-accent"
               />
-              <div className="mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-wider text-sub">
-                pack
+              <div className="mb-1.5 mt-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-sub">
+                <span>pack</span>
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const pool = SOUND_PACKS.filter((p) => p.id !== pack)
+                    const pick = pool[Math.floor(Math.random() * pool.length)]
+                    if (pick) {
+                      onPackChange(pick.id)
+                      setTimeout(() => playKey({ row: 2, col: 0 }), 30)
+                    }
+                  }}
+                  title="shuffle sound pack"
+                  aria-label="shuffle sound pack"
+                  className="flex items-center gap-1 rounded px-1 py-0.5 normal-case tracking-normal text-sub transition-colors duration-100 hover:text-accent"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="4" />
+                    <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+                    <circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" stroke="none" />
+                  </svg>
+                  shuffle
+                </button>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {SOUND_PACKS.map((p) => (
@@ -173,18 +194,32 @@ function TopBar({
         <motion.div
           whileHover={{ rotate: -8, scale: 1.08 }}
           transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          className="shadow-accent"
+          title={`theme: ${themeId}`}
         >
-          <img
-            src="/logo.svg"
-            alt=""
-            width="36"
-            height="36"
-            className="h-9 w-9 rounded-xl"
-          />
+          <svg
+            width="34"
+            height="34"
+            viewBox="0 0 64 64"
+            className="h-[34px] w-[34px]"
+            role="img"
+            aria-label="takt logo"
+          >
+            <defs>
+              <mask id="takt-cut">
+                <rect x="6" y="14" width="52" height="12" rx="6" fill="white" />
+                <polygon points="16.75,19 20.25,19 22.5,27 15.5,27" fill="black" />
+                <polygon points="29.75,19 33.25,19 35.5,27 28.5,27" fill="black" />
+                <polygon points="42.75,19 46.25,19 48.5,27 41.5,27" fill="black" />
+              </mask>
+            </defs>
+            <g fill="var(--color-accent)">
+              <rect x="6" y="14" width="52" height="12" rx="6" mask="url(#takt-cut)" />
+              <rect x="27" y="24" width="10" height="32" rx="5" />
+            </g>
+          </svg>
         </motion.div>
         <span className="grad-text text-2xl font-bold tracking-tight">
-          typer
+          takt
         </span>
       </div>
 

@@ -20,9 +20,9 @@ function MatrixRain() {
     const reduced = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     )?.matches
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
-    const fontSize = 16
-    const FRAME_MS = 1000 / 24 /* authentic low-fi cadence */
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25)
+    const fontSize = 20
+    const FRAME_MS = 1000 / 14 /* slow cinematic cadence, not arcade-fast */
 
     let drops = []
     let raf = 0
@@ -39,11 +39,13 @@ function MatrixRain() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.fillStyle = "#020b06"
       ctx.fillRect(0, 0, w, h)
+      /* sparse premium density: ~45% columns, random gaps */
       const n = Math.ceil(w / fontSize)
-      drops = Array.from({ length: n }, () => ({
+      drops = Array.from({ length: n }, (_, i) => ({
+        active: (i % 2 === 0 && Math.random() > 0.25) || Math.random() < 0.12,
         y: Math.random() * (h / fontSize) - h / fontSize,
-        speed: 0.5 + Math.random() * 1.1,
-        bright: Math.random() < 0.05,
+        speed: 0.22 + Math.random() * 0.45,
+        bright: Math.random() < 0.03,
         glyph: randomGlyph(),
       }))
     }
@@ -67,38 +69,39 @@ function MatrixRain() {
       if (ts - last < FRAME_MS) return
       last = ts
 
-      /* phosphor trail fade */
-      ctx.fillStyle = "rgba(2, 11, 6, 0.11)"
+      /* slow phosphor trail fade — longer trails, calmer motion */
+      ctx.fillStyle = "rgba(2, 11, 6, 0.18)"
       ctx.fillRect(0, 0, w, h)
-      ctx.font = `bold 15px "JetBrains Mono", monospace`
+      ctx.font = `15px "JetBrains Mono", monospace`
 
       for (let i = 0; i < drops.length; i++) {
         const d = drops[i]
+        if (!d.active) continue
         const x = i * fontSize
         const y = d.y * fontSize
 
-        /* the glowing head */
-        ctx.fillStyle = d.bright ? "#eafff2" : "#8dffb5"
-        ctx.shadowColor = "rgba(0, 255, 65, 0.8)"
-        ctx.shadowBlur = d.bright ? 10 : 6
+        /* soft glowing head — no harsh white */
+        ctx.fillStyle = d.bright ? "#c9ffe0" : "#5fdc8c"
+        ctx.shadowColor = "rgba(0, 255, 65, 0.45)"
+        ctx.shadowBlur = d.bright ? 8 : 4
         ctx.fillText(d.glyph, x, y)
         ctx.shadowBlur = 0
 
-        /* a dimmer glyph right behind the head */
-        ctx.fillStyle = "rgba(0, 255, 65, 0.55)"
+        /* dimmer glyph right behind the head */
+        ctx.fillStyle = "rgba(0, 255, 65, 0.32)"
         ctx.fillText(randomGlyph(), x, y - fontSize)
 
         d.y += d.speed
         d.glyph = randomGlyph()
 
-        /* occasionally flip a head to pure white for sparkle */
-        if (Math.random() < 0.008) d.bright = !d.bright
+        /* occasionally flip a head for subtle sparkle */
+        if (Math.random() < 0.004) d.bright = !d.bright
 
         if (y - fontSize * 14 > h) {
-          if (Math.random() > 0.976) {
+          if (Math.random() > 0.965) {
             d.y = Math.random() * -18
-            d.speed = 0.5 + Math.random() * 1.1
-            d.bright = Math.random() < 0.05
+            d.speed = 0.22 + Math.random() * 0.45
+            d.bright = Math.random() < 0.03
           }
         }
       }

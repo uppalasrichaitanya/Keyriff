@@ -56,14 +56,6 @@ function encodePNG(width, height, rgba) {
 
 const S = 64
 
-function insideRounded(px, py, x0, y0, w, h, r) {
-  if (px < x0 || px > x0 + w || py < y0 || py > y0 + h) return false
-  const dx = Math.min(px - x0, x0 + w - px)
-  const dy = Math.min(py - y0, y0 + h - py)
-  if (dx <= r && dy <= r) return (r - dx) ** 2 + (r - dy) ** 2 <= r * r
-  return true
-}
-
 /* KEYRIFF mark (K-cut): stroked K with rhythm interruption in the upper arm.
    PWA icons are full-bleed charcoal (OS maskable requirement) — the bare
    glyph lives in logo.svg / favicon.svg / in-app SVG. */

@@ -17,9 +17,12 @@ const THEME_CYCLE = ["ghost", "midnight", "synthwave", "sakura", "ember", "abyss
 const KB_CYCLE = ["spectre", "onyx", "deck", "monolith", "halo"]
 
 export function useShowcase({ engine, setThemeId, setSettings, setSeenIntro, setScreen }) {
-  const active = useMemo(isShowcase, [])
-  const live = useRef(null)
-  live.current = { engine, setThemeId, setSettings, setSeenIntro, setScreen }
+  const active = useMemo(() => isShowcase(), [])
+  const live = useRef({ engine, setThemeId, setSettings, setSeenIntro, setScreen })
+
+  useEffect(() => {
+    live.current = { engine, setThemeId, setSettings, setSeenIntro, setScreen }
+  })
 
   /* boot: pin scene from params, dismiss intro, tame modifiers */
   useEffect(() => {

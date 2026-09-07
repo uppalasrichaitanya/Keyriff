@@ -1256,6 +1256,18 @@ html[data-showcase] * {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  /* static caret — no blinking */
+  .animate-blink {
+    animation: none;
+  }
+  /* steady next-key glow instead of the breathing pulse */
+  .kb-key.next .kb-top::after {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
 /* error pulse on the board frame */
 .kb-frame.error-flash {
   border-color: color-mix(in srgb, var(--color-error) 75%, transparent) !important;

@@ -240,7 +240,7 @@ const lightFailed = results.some(
 )
 const styleFailed = results.some((v) => {
   if (!v.qa) return false
-  if (v.qa.kb_laser === undefined) return false
+  if (v.qa.kb_spectre === undefined) return false
   for (const style of ["spectre", "onyx", "deck", "monolith", "halo"]) {
     if (v.qa[`kb_${style}`] !== style) return true
   }

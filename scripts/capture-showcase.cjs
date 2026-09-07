@@ -3,10 +3,8 @@
    gifenc encodes. Serves dist/ on preview (build first).
    Usage: node scripts/capture-showcase.cjs
    Output: docs/showcase/{hero,tour,boards}.gif (kept out of the PWA bundle). */
-const { spawn } = require("node:child_process");
 const { mkdirSync, writeFileSync } = require("node:fs");
-const { join, dirname } = require("node:path");
-const { fileURLToPath } = require("node:url");
+const { join } = require("node:path");
 
 const ROOT = join(__dirname, "..");
 const OUT = join(ROOT, "docs", "showcase");

@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, memo } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, memo } from "react"
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion"
 import Caret from "./Caret"
+import { pbKey } from "../lib/engine"
 
 function LockIcon() {
   return (
@@ -64,6 +65,34 @@ const Word = memo(function Word({ w, input, isDone }) {
   )
 })
 
+/* PB ghost caret lookup — fully self-contained so the parent never needs
+   new data plumbing.
+   Contract: optional `ghostWpm` number prop overrides everything (<= 0 or
+   absent = look up `typer:v2:pbs[pbKey(settings, words.length)]`; still
+   0/absent = ghost hidden). Returns 0 when there is no PB for this mode. */
+function lookupPbWpm(wordCount) {
+  try {
+    const settings = JSON.parse(localStorage.getItem("typer:v2:settings") ?? "{}")
+    const pbs = JSON.parse(localStorage.getItem("typer:v2:pbs") ?? "{}")
+    const key = pbKey(
+      {
+        mode: "time",
+        timeValue: 30,
+        wordValue: 25,
+        punctuation: false,
+        numbers: false,
+        wordLength: "any",
+        ...settings,
+      },
+      wordCount
+    )
+    const wpm = pbs?.[key]?.wpm
+    return typeof wpm === "number" && wpm > 0 ? wpm : 0
+  } catch {
+    return 0
+  }
+}
+
 function TypingTest({
   words,
   typed,
@@ -74,6 +103,7 @@ function TypingTest({
   onFocusRequest,
   zen = false,
   fontSize = "m",
+  ghostWpm = null,
 }) {
   const wordsBoxRef = useRef(null)
   const typingTimeoutRef = useRef(0)
@@ -88,6 +118,75 @@ function TypingTest({
      forced layout read */
   const lineHRef = useRef(0)
   const lineHKeyRef = useRef("")
+
+  /* PB ghost caret: replays the mode PB rhythm (one char per
+     60 / pbWpm / 5 s) behind the live caret. PB is re-resolved per test
+     (words identity) so a freshly-set record shows up on the next run.
+     Single 100ms interval while running; hidden under reduced motion. */
+  const [reducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true
+  )
+  const pbWpm = useMemo(
+    () =>
+      typeof ghostWpm === "number" && ghostWpm > 0
+        ? ghostWpm
+        : lookupPbWpm(words.length),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [words, ghostWpm]
+  )
+  const [ghostPos, setGhostPos] = useState(null)
+  const ghostStartRef = useRef(0)
+
+  useEffect(() => {
+    if (status !== "running") {
+      ghostStartRef.current = 0
+      setGhostPos(null)
+    }
+  }, [status, words])
+
+  useEffect(() => {
+    if (status !== "running" || !pbWpm || pbWpm <= 0 || reducedMotion)
+      return
+    if (!ghostStartRef.current) ghostStartRef.current = performance.now()
+    const t0 = ghostStartRef.current
+    const charsPerSec = (pbWpm * 5) / 60
+    const lens = words.map((w) => w.length + 1)
+    const total = lens.reduce((a, b) => a + b, 0)
+    const id = setInterval(() => {
+      const chars = Math.floor(((performance.now() - t0) / 1000) * charsPerSec)
+      if (chars >= total) {
+        setGhostPos(null)
+        return
+      }
+      let acc = 0
+      let wi = 0
+      while (wi < lens.length - 1 && acc + lens[wi] <= chars) {
+        acc += lens[wi]
+        wi++
+      }
+      const ci = chars - acc
+      const box = wordsBoxRef.current
+      const el = box?.childNodes[wi]
+      if (!(el instanceof Element)) return
+      const charEl = el.querySelector(`[data-ci="${ci}"]`)
+      let x
+      if (charEl) {
+        x = el.offsetLeft + charEl.offsetLeft
+      } else {
+        const lastChar =
+          el.querySelector(`[data-ci="${ci - 1}"]`) ?? el.lastElementChild
+        x = lastChar
+          ? el.offsetLeft + lastChar.offsetLeft + lastChar.offsetWidth + 2
+          : el.offsetLeft
+      }
+      const firstChar = el.querySelector('[data-ci="0"]')
+      const y = el.offsetTop + (firstChar?.offsetTop ?? charEl?.offsetTop ?? 0)
+      setGhostPos((prev) => (prev?.x === x && prev?.y === y ? prev : { x, y }))
+    }, 100)
+    return () => clearInterval(id)
+  }, [status, pbWpm, words, reducedMotion])
 
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
@@ -140,11 +239,12 @@ function TypingTest({
     const lineH = lineHRef.current
     const activeLine = Math.round((wordEl.offsetTop + 1) / lineH)
     setScrollY(-Math.max(0, activeLine - 1) * lineH)
+    shakeIndexRef.current = wordIndex
   }, [typed, wordIndex, words, currentInput.length, caretX, caretY, fontSize, zen])
 
   useEffect(() => {
     if (errorTick === 0) return
-    wordElAt(typed.length - 1)?.animate(
+    wordElAt(shakeIndexRef.current)?.animate(
       [
         { transform: "translateX(0)" },
         { transform: "translateX(-3px)" },
@@ -156,6 +256,8 @@ function TypingTest({
   }, [errorTick])
 
   const prevWordIndexRef = useRef(0)
+  /* latest word index for the error shake (intentionally keyed only on errorTick) */
+  const shakeIndexRef = useRef(0)
   useEffect(() => {
     const wi = typed.length - 1
     if (wi > prevWordIndexRef.current && status === "running") {
@@ -238,6 +340,17 @@ function TypingTest({
             typing={typing}
             innerRef={caretInnerRef}
           />
+          {ghostPos && status === "running" && !blurred && !reducedMotion && (
+            <div
+              className="caret-ghost"
+              style={{
+                transform: `translate(${ghostPos.x}px, ${ghostPos.y}px)`,
+              }}
+              aria-hidden
+            >
+              <span className="caret-ghost-tag">PB {Math.round(pbWpm)}</span>
+            </div>
+          )}
         </motion.div>
 
         <AnimatePresence>

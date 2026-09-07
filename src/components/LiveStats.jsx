@@ -2,6 +2,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   useSyncExternalStore,
   memo,
 } from "react"
@@ -15,6 +16,9 @@ function BoltIcon() {
     </svg>
   )
 }
+
+/* streaks that trigger the milestone beat (sound + badge slam + flash) */
+const MILESTONES = [25, 50, 100, 200]
 
 /* memoized: only redraws when the series gains a second.
    bklit live-line pattern: momentum-colored line (up = accent, fading =
@@ -169,19 +173,30 @@ function LiveStats({
     }
   }, [elapsed, running, timed, limitMs, settings.sound])
 
-  /* streak milestone sparkle */
+  /* streak milestone sparkle: sound + visual beat (badge slam + a brief
+     radial flash). The slam fires ONLY on milestone transitions, never on
+     plain increments; both are transform/opacity-only and fully
+     self-contained (no App changes). */
+  const badgeRef = useRef(null)
+  const [flashKey, setFlashKey] = useState(0)
   const prevStreakRef = useRef(0)
   useEffect(() => {
-    if (
+    const hit =
       running &&
-      [25, 50, 100, 200].includes(streak) &&
-      streak > prevStreakRef.current &&
-      settings.sound
-    ) {
-      playMilestone()
+      MILESTONES.includes(streak) &&
+      streak > prevStreakRef.current
+    if (hit) {
+      if (settings.sound) playMilestone()
+      if (!prefersReduced) {
+        badgeRef.current?.animate(
+          [{ transform: "scale(1.35)" }, { transform: "scale(1)" }],
+          { duration: 380, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" }
+        )
+        setFlashKey((k) => k + 1)
+      }
     }
     prevStreakRef.current = streak
-  }, [streak, running, settings.sound])
+  }, [streak, running, settings.sound, prefersReduced])
 
   return (
     <div className="mb-3 flex h-12 select-none items-end justify-between sm:h-14">
@@ -233,6 +248,7 @@ function LiveStats({
           {running && streak >= 4 && (
             <motion.div
               key="streak"
+              ref={badgeRef}
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
@@ -282,6 +298,17 @@ function LiveStats({
           )}
         </AnimatePresence>
       </div>
+      {/* milestone energy spike: fixed radial flash, opacity-only, 600ms */}
+      {flashKey > 0 && (
+        <motion.div
+          key={flashKey}
+          className="streak-flash"
+          initial={{ opacity: 0.55 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          aria-hidden
+        />
+      )}
     </div>
   )
 }

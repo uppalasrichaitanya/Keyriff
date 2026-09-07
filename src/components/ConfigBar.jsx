@@ -141,6 +141,13 @@ function ConfigBar({ settings, onChange }) {
   const set = (patch) => onChange({ ...settings, ...patch })
   const [customOpen, setCustomOpen] = useState(false)
   const isCustom = settings.mode === "custom"
+  /* caret visuals are pure CSS on html[data-caret] (see index.css), so the
+     live caret picks up style switches with zero re-render plumbing.
+     Default "line" lives here at the read site. */
+  const caretStyle = settings.caretStyle ?? "line"
+  useEffect(() => {
+    document.documentElement.dataset.caret = caretStyle
+  }, [caretStyle])
 
   function handleCustomClick() {
     if (!isCustom && settings.customText) {
@@ -257,6 +264,36 @@ function ConfigBar({ settings, onChange }) {
           onClick={() => set({ forceCorrect: !settings.forceCorrect })}
         >
           fix first
+        </Pill>
+
+        <Divider />
+
+        <span className="mx-1 self-center text-[13px] text-sub/70 select-none sm:text-sm">
+          caret
+        </span>
+        <Pill
+          group="cfg-caret"
+          label="caret style line"
+          active={caretStyle === "line"}
+          onClick={() => set({ caretStyle: "line" })}
+        >
+          line
+        </Pill>
+        <Pill
+          group="cfg-caret"
+          label="caret style block"
+          active={caretStyle === "block"}
+          onClick={() => set({ caretStyle: "block" })}
+        >
+          block
+        </Pill>
+        <Pill
+          group="cfg-caret"
+          label="caret style underline"
+          active={caretStyle === "underline"}
+          onClick={() => set({ caretStyle: "underline" })}
+        >
+          underline
         </Pill>
 
         {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (

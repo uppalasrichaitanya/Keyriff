@@ -12,9 +12,10 @@ const PORT = 5199;
 const BASE = `http://localhost:${PORT}`;
 
 const VW = 880;
-const VH = 550;
+const VH = 620;
 const GW = 440;
-const GH = 275;
+const GH = 310;
+const ZOOM = 0.8;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -32,23 +33,53 @@ async function main() {
   });
   const page = await browser.newPage();
   await page.setViewport({ width: VW, height: VH });
+  /* seed showcase delights before any app script runs: block caret +
+     a mode PB so the ghost caret replays behind the live caret */
+  await page.evaluateOnNewDocument(() => {
+    try {
+      const raw = localStorage.getItem("typer:v2:settings");
+      const s = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(
+        "typer:v2:settings",
+        JSON.stringify({
+          mode: "time", timeValue: 30, wordValue: 25,
+          punctuation: false, numbers: false, wordLength: "any",
+          fontSize: "m", sound: false, volume: 85, pack: "tactile",
+          showHeat: false, forceCorrect: false, suddenDeath: false,
+          customText: "", ...s, caretStyle: "block",
+        })
+      );
+      const pbs = JSON.parse(localStorage.getItem("typer:v2:pbs") ?? "{}");
+      if (!pbs["time-30"] || !(pbs["time-30"].wpm > 0)) {
+        pbs["time-30"] = { wpm: 82, acc: 97 };
+        localStorage.setItem("typer:v2:pbs", JSON.stringify(pbs));
+      }
+      localStorage.setItem("typer:v2:seen-intro", "true");
+    } catch {}
+  });
 
-  async function recordClip(url, seconds, fps = 7) {
+  async function recordClip(url, seconds, fps = 9) {
     await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+    /* 80% zoom pulls the full keyboard into frame at 880x620
+       (probe: kb bottom 695 cropped at 100%, 557 fits at 80%) */
+    await page.evaluate((z) => { document.body.style.zoom = String(z); }, ZOOM);
     await sleep(1800);
     const client = await page.createCDPSession();
-    const frames = [];
-    client.on("Page.screencastFrame", async ({ data, sessionId }) => {
-      try {
-        await client.send("Page.screencastFrameAck", { sessionId });
-      } catch {}
-      const buf = Buffer.from(data, "base64");
-      const raw = jpeg.decode(buf, { maxMemoryUsageInMB: 512 });
-      frames.push(downsample(raw, raw.width, raw.height));
+    const rawFrames = [];
+    /* ack + stash only: jpeg decode + downsample (~150-250ms/frame in
+       pure JS) on the hot path back-pressures the compositor to ~4fps.
+       Stashing base64 buffers is ~2ms, so Chrome sustains the full ~8.5fps
+       source rate; the expensive decode happens after stopScreencast. */
+    client.on("Page.screencastFrame", ({ data, sessionId }) => {
+      client.send("Page.screencastFrameAck", { sessionId }).catch(() => {});
+      rawFrames.push(Buffer.from(data, "base64"));
     });
     await client.send("Page.startScreencast", {
+      /* quality 40: software JPEG encode is the emission bottleneck
+         (q55 capped us at ~4fps); after 2x downsample + 128-color GIF
+         quantize, q40 source is visually indistinguishable. */
       format: "jpeg",
-      quality: 55,
+      quality: 40,
       everyNthFrame: Math.max(1, Math.round(60 / fps)),
     });
     await sleep(seconds * 1000);
@@ -57,10 +88,14 @@ async function main() {
     } catch {}
     await sleep(300);
     await client.detach().catch(() => {});
+    const frames = rawFrames.map((buf) => {
+      const raw = jpeg.decode(buf, { maxMemoryUsageInMB: 512 });
+      return downsample(raw, raw.width, raw.height);
+    });
     return frames;
   }
 
-  /* 2x box downsample 880x550 -> 440x275 (RGBA Buffer) */
+  /* 2x box downsample 880x620 -> 440x310 (RGBA Buffer) */
   function downsample(raw, w, h) {
     const sx = Math.round(w / GW);
     const sy = Math.round(h / GH);
@@ -98,35 +133,44 @@ async function main() {
     return Buffer.from(gif.bytes());
   }
 
-  async function scene(name, clips) {
+  async function scene(name, clips, maxFrames = 48) {
     let frames = [];
+    let wallSecs = 0;
     for (const [url, secs] of clips) {
       frames = frames.concat(await recordClip(url, secs));
+      wallSecs += secs;
     }
-    /* trim to ~6.5s at ~7fps for size discipline */
-    const maxFrames = 46;
+    /* trim for size discipline (stays <1MB each) */
     let sampled = frames;
     if (frames.length > maxFrames) {
       const step = frames.length / maxFrames;
       sampled = Array.from({ length: maxFrames }, (_, i) => frames[Math.floor(i * step)]);
     }
-    const bytes = encodeGif(sampled, Math.round(1000 / 7));
+    /* real-time pacing: delay matches the measured source rate, so the GIF
+       plays at 1x speed even when headless compositing runs slower than 9fps.
+       (A typing screen is mostly static between keystrokes, so 4-8fps source
+       paced in real time reads as smooth, never fast-forward.) */
+    const delay = Math.max(20, Math.round((wallSecs * 1000) / sampled.length));
+    const bytes = encodeGif(sampled, delay);
     writeFileSync(join(OUT, name), bytes);
-    console.log(`wrote docs/showcase/${name} (${frames.length} frames -> ${sampled.length}, ${(bytes.length / 1024).toFixed(0)} KB)`);
+    console.log(`wrote docs/showcase/${name} (${frames.length} frames -> ${sampled.length}, ${delay}ms delay, ${(bytes.length / 1024).toFixed(0)} KB)`);
   }
 
   const q = (theme, kb) => `${BASE}/?showcase&theme=${theme}&kb=${kb}`;
-  await scene("hero.gif", [[q("ghost", "spectre"), 6]]);
-  await scene("tour.gif", [
+  /* optional argv filter: `node scripts/capture-showcase.cjs boards`
+     recaptures a single scene (used to retry a contended run) */
+  const only = (process.argv[2] || "").replace(/\.gif$/, "");
+  if (!only || only === "hero") await scene("hero.gif", [[q("ghost", "spectre"), 6]], 48);
+  if (!only || only === "tour") await scene("tour.gif", [
     [q("ghost", "spectre"), 2.2],
     [q("synthwave", "spectre"), 2.2],
     [q("sakura", "spectre"), 2.2],
-  ]);
-  await scene("boards.gif", [
-    [q("midnight", "deck"), 2.2],
-    [q("midnight", "monolith"), 2.2],
-    [q("midnight", "halo"), 2.2],
-  ]);
+  ], 48);
+  if (!only || only === "boards") await scene("boards.gif", [
+    [q("midnight", "deck"), 3.5],
+    [q("midnight", "monolith"), 3.5],
+    [q("midnight", "halo"), 3.5],
+  ], 42);
 
   await browser.close();
 }

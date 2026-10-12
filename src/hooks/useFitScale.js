@@ -1,10 +1,16 @@
 import { useLayoutEffect, useRef, useState } from "react"
 
+/* never shrink below this — keys stay legible */
+const MIN_SCALE = 0.55
+
 /* Scales a fixed-design-width element down to fit its container
    (and the visible viewport height), like a physical keyboard
    shrinking on a phone. Returns a ref for the measuring wrapper
-   and a transform: scale value. */
-export function useFitScale(designWidth = 680, designHeight = 352) {
+   and a transform: scale value.
+   `reserve` (px): when set, the height budget is whatever the viewport has
+   left after that much page chrome, so the whole board stays on screen on
+   a short laptop window instead of spilling below the fold. */
+export function useFitScale(designWidth = 680, designHeight = 352, reserve = null) {
   const ref = useRef(null)
   /* seed from the viewport so the first paint is already ~right */
   const [scale, setScale] = useState(() => {
@@ -22,7 +28,11 @@ export function useFitScale(designWidth = 680, designHeight = 352) {
         if (!w) return
         const vv = window.visualViewport
         const availH = vv ? vv.height : window.innerHeight
-        const s = Math.min(1, w / designWidth, (availH * 0.44) / designHeight)
+        const byHeight =
+          reserve == null
+            ? (availH * 0.44) / designHeight
+            : Math.max(MIN_SCALE, (availH - reserve) / designHeight)
+        const s = Math.min(1, w / designWidth, byHeight)
         setScale((prev) => (Math.abs(prev - s) > 0.005 ? s : prev))
       }
       cancelAnimationFrame(raf)
@@ -47,7 +57,7 @@ export function useFitScale(designWidth = 680, designHeight = 352) {
       vv?.removeEventListener?.("resize", measure)
       cancelAnimationFrame(raf)
     }
-  }, [designWidth, designHeight])
+  }, [designWidth, designHeight, reserve])
 
   return { ref, scale }
 }

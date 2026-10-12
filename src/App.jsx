@@ -192,7 +192,10 @@ export default function App() {
       const existing = pbsRef.current[result.key]
       const isPb =
         result.key !== "practice" && (!existing || result.wpm > existing.wpm)
-      if (settings.sound) (isPb ? playRecord() : playFinish())
+      if (settings.sound) {
+        if (isPb) playRecord()
+        else playFinish()
+      }
       setLastResult({ ...result, isPb, prevPb: existing ?? null })
       if (isPb) {
         setPbs((prev) => ({
@@ -622,7 +625,7 @@ export default function App() {
             <motion.div
               key="test"
               {...screenMotion("test")}
-              className={`flex flex-col ${zen ? "gap-4" : "gap-6 [@media(min-height:800px)]:gap-9"}`}
+              className={`flex flex-col ${zen ? "gap-4" : "gap-6 [@media(min-height:900px)]:gap-9"}`}
             >
               {!zen && (
                 <AnimatePresence>

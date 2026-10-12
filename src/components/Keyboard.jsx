@@ -6,6 +6,8 @@ import { useFitScale } from "../hooks/useFitScale"
 
 const DESIGN_W = 760
 const DESIGN_H = 352
+/* page chrome above + below the main board (header, options, text, footer) */
+const PAGE_RESERVE = 500
 
 
 const Key = memo(function Key({ k, isPressed, isGlow, isCapsLit, heatRatio }) {
@@ -166,7 +168,7 @@ function Keyboard({
       ? new Set([...pressed, ...externalPressed])
       : pressed
 
-  const { ref: fitRef, scale } = useFitScale(DESIGN_W, DESIGN_H)
+  const { ref: fitRef, scale } = useFitScale(DESIGN_W, DESIGN_H, compact ? null : PAGE_RESERVE)
 
   return (
     <div
@@ -174,7 +176,7 @@ function Keyboard({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       aria-hidden="true"
-      className={`select-none px-1 ${compact ? "" : "mt-10 pb-2 pt-3"}`}
+      className={`select-none px-1 ${compact ? "" : "mt-6 pb-2 pt-3 [@media(min-height:900px)]:mt-10"}`}
     >
       <div
         className="flex justify-center overflow-hidden"

@@ -191,7 +191,6 @@ export function useTypingEngine(settings, handlers = {}) {
       /* a restart/practice-start may have happened since this frame
          was scheduled — never touch state for a dead test */
       if (statusRef.current !== "running") return
-      const s = settingsRef.current
       const el = performance.now() - startRef.current
       clockRef.value = el
       for (const cb of [...clockRef.subs]) {

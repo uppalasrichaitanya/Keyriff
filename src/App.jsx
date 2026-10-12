@@ -49,6 +49,7 @@ const DEFAULT_SETTINGS = {
   fontSize: "m",
   kbStyle: "laser",
   suddenDeath: false,
+  ghost: false,
 }
 
 function RestartIcon() {
@@ -637,6 +638,7 @@ export default function App() {
                   blurred={blurred}
                   zen={zen}
                   fontSize={settings.fontSize}
+                  showGhost={settings.ghost === true}
                   onFocusRequest={requestFocus}
                 />
                 <ProgressBar

@@ -295,6 +295,13 @@ function ConfigBar({ settings, onChange }) {
         >
           underline
         </Pill>
+        <Pill
+          label="show a ghost caret that replays your personal best"
+          active={settings.ghost === true}
+          onClick={() => set({ ghost: !settings.ghost })}
+        >
+          pb ghost
+        </Pill>
 
         {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (
           <>

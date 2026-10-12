@@ -86,7 +86,8 @@ const Spark = memo(function Spark({ series }) {
         cy={last[1]}
         r="3"
         fill={line}
-        animate={{ opacity: [1, 0.45, 1], r: [3, 4, 3] }}
+        animate={{ opacity: [1, 0.45, 1], scale: [1, 1.33, 1] }}
+        style={{ transformBox: "fill-box", transformOrigin: "center" }}
         transition={{ duration: 1.4, repeat: Infinity }}
       />
     </motion.svg>
@@ -192,7 +193,7 @@ function LiveStats({
           [{ transform: "scale(1.35)" }, { transform: "scale(1)" }],
           { duration: 380, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" }
         )
-        setFlashKey((k) => k + 1)
+        if (streak >= 50) setFlashKey((k) => k + 1)
       }
     }
     prevStreakRef.current = streak

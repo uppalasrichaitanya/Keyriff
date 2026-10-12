@@ -104,6 +104,7 @@ function TypingTest({
   zen = false,
   fontSize = "m",
   ghostWpm = null,
+  showGhost = false,
 }) {
   const wordsBoxRef = useRef(null)
   const typingTimeoutRef = useRef(0)
@@ -147,7 +148,7 @@ function TypingTest({
   }, [status, words])
 
   useEffect(() => {
-    if (status !== "running" || !pbWpm || pbWpm <= 0 || reducedMotion)
+    if (!showGhost || status !== "running" || !pbWpm || pbWpm <= 0 || reducedMotion)
       return
     if (!ghostStartRef.current) ghostStartRef.current = performance.now()
     const t0 = ghostStartRef.current
@@ -186,7 +187,7 @@ function TypingTest({
       setGhostPos((prev) => (prev?.x === x && prev?.y === y ? prev : { x, y }))
     }, 100)
     return () => clearInterval(id)
-  }, [status, pbWpm, words, reducedMotion])
+  }, [showGhost, status, pbWpm, words, reducedMotion])
 
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
@@ -340,7 +341,7 @@ function TypingTest({
             typing={typing}
             innerRef={caretInnerRef}
           />
-          {ghostPos && status === "running" && !blurred && !reducedMotion && (
+          {showGhost && ghostPos && status === "running" && !blurred && !reducedMotion && (
             <div
               className="caret-ghost"
               style={{

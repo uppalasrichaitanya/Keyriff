@@ -359,7 +359,7 @@ export default function StatsPage({
             <div className="mb-1 px-1 text-sm font-medium text-sub">
               wpm progression
             </div>
-            <ProgressChart data={ordered} />
+            <ProgressChart data={ordered.slice(-100)} />
           </motion.div>
 
           <ActivityHeatmap history={history} />

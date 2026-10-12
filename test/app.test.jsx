@@ -124,9 +124,29 @@ describe("App", () => {
     seed(BASE_SETTINGS)
     render(<App />)
     const before = testWords()[0]
+    fireEvent.click(screen.getByRole("button", { name: "more options" }))
     fireEvent.click(screen.getByRole("button", { name: "numbers" }))
     const after = testWords()[0]
     expect(document.querySelectorAll('[data-ci="0"]').length).toBeGreaterThan(20)
     expect(after).not.toBe(before)
+  })
+
+  test("modifiers live behind a more button, with a dot when one is active", () => {
+    seed({ ...BASE_SETTINGS, suddenDeath: true })
+    render(<App />)
+    expect(screen.queryByRole("button", { name: "numbers" })).toBeNull()
+    expect(screen.getByRole("button", { name: "more options" }).textContent).toContain("•")
+    fireEvent.click(screen.getByRole("button", { name: "more options" }))
+    expect(screen.getByRole("button", { name: "numbers" })).toBeInTheDocument()
+  })
+
+  test("calm mode drops the animated background", () => {
+    seed(BASE_SETTINGS)
+    const { container } = render(<App />)
+    expect(container.querySelector(".bgfx")).not.toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "more options" }))
+    fireEvent.click(screen.getByRole("button", { name: /calm mode/ }))
+    expect(container.querySelector(".bgfx")).toBeNull()
+    expect(document.documentElement.dataset.calm).toBe("1")
   })
 })

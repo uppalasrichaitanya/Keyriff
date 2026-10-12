@@ -6,6 +6,7 @@ import { dialogOpen, dialogClose } from "../lib/dialogs"
 const TIME_VALUES = [15, 30, 60, 120]
 const WORD_VALUES = [10, 25, 50, 100]
 const WORD_LENGTHS = ["any", "short", "long"]
+const WORD_POOLS = ["all", "common", "rare"]
 
 const barVariants = {
   hidden: {},
@@ -159,6 +160,22 @@ function ConfigBar({ settings, onChange }) {
     }
   }
 
+  const standard =
+    settings.mode !== "quote" &&
+    settings.mode !== "custom" &&
+    settings.mode !== "daily"
+  const moreOpen = settings.moreOpen === true
+  /* dot on "more" when something tucked inside it is changing the test,
+     so a hidden modifier never silently alters results */
+  const modifiersOn =
+    (standard &&
+      (settings.punctuation ||
+        settings.numbers ||
+        (settings.wordLength && settings.wordLength !== "any") ||
+        (settings.wordPool && settings.wordPool !== "all"))) ||
+    !!settings.suddenDeath ||
+    !!settings.forceCorrect
+
   return (
     <>
       <motion.div
@@ -166,29 +183,6 @@ function ConfigBar({ settings, onChange }) {
         {...(reduceMotion() ? { initial: false } : { initial: "hidden", animate: "show" })}
         className="flex flex-wrap items-center justify-center gap-0.5 select-none"
       >
-        {settings.mode !== "quote" &&
-          settings.mode !== "custom" &&
-          settings.mode !== "daily" && (
-            <>
-              <Pill
-                label="punctuation"
-                active={settings.punctuation}
-                onClick={() => set({ punctuation: !settings.punctuation })}
-              >
-                punctuation
-              </Pill>
-              <Pill
-                label="numbers"
-                active={settings.numbers}
-                onClick={() => set({ numbers: !settings.numbers })}
-              >
-                numbers
-              </Pill>
-
-              <Divider />
-            </>
-          )}
-
         <Pill
           group="cfg-mode"
           label="time mode"
@@ -230,83 +224,9 @@ function ConfigBar({ settings, onChange }) {
           custom
         </Pill>
 
-        <Divider />
-
-        {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (
-          <Pill
-            label="word length"
-            active={!!settings.wordLength && settings.wordLength !== "any"}
-            onClick={() =>
-              set({
-                wordLength:
-                  WORD_LENGTHS[
-                    (WORD_LENGTHS.indexOf(settings.wordLength ?? "any") + 1) %
-                      WORD_LENGTHS.length
-                  ],
-              })
-            }
-          >
-            abc {settings.wordLength ?? "any"}
-          </Pill>
-        )}
-
-        <Pill
-          label="sudden death — test ends on the first mistake"
-          active={!!settings.suddenDeath}
-          onClick={() => set({ suddenDeath: !settings.suddenDeath })}
-        >
-          sudden death
-        </Pill>
-
-        <Pill
-          label="fix errors before moving on"
-          active={!!settings.forceCorrect}
-          onClick={() => set({ forceCorrect: !settings.forceCorrect })}
-        >
-          fix first
-        </Pill>
-
-        <Divider />
-
-        <span className="mx-1 self-center text-[13px] text-sub/70 select-none sm:text-sm">
-          caret
-        </span>
-        <Pill
-          group="cfg-caret"
-          label="caret style line"
-          active={caretStyle === "line"}
-          onClick={() => set({ caretStyle: "line" })}
-        >
-          line
-        </Pill>
-        <Pill
-          group="cfg-caret"
-          label="caret style block"
-          active={caretStyle === "block"}
-          onClick={() => set({ caretStyle: "block" })}
-        >
-          block
-        </Pill>
-        <Pill
-          group="cfg-caret"
-          label="caret style underline"
-          active={caretStyle === "underline"}
-          onClick={() => set({ caretStyle: "underline" })}
-        >
-          underline
-        </Pill>
-        <Pill
-          label="show a ghost caret that replays your personal best"
-          active={settings.ghost === true}
-          onClick={() => set({ ghost: !settings.ghost })}
-        >
-          pb ghost
-        </Pill>
-
-        {settings.mode !== "quote" && settings.mode !== "custom" && settings.mode !== "daily" && (
+        {standard && (
           <>
             <Divider />
-
             {(settings.mode === "time" ? TIME_VALUES : WORD_VALUES).map((v) => (
               <Pill
                 key={v}
@@ -330,7 +250,123 @@ function ConfigBar({ settings, onChange }) {
             ))}
           </>
         )}
+
+        <Divider />
+        <Pill
+          label="more options"
+          active={moreOpen}
+          onClick={() => set({ moreOpen: !moreOpen })}
+        >
+          more{!moreOpen && modifiersOn ? " •" : ""}
+        </Pill>
       </motion.div>
+
+      {moreOpen && (
+        <motion.div
+          variants={barVariants}
+          {...(reduceMotion() ? { initial: false } : { initial: "hidden", animate: "show" })}
+          className="-mt-5 flex flex-col items-center gap-1 select-none"
+        >
+          <div className="flex flex-wrap items-center justify-center gap-0.5">
+          {standard && (
+            <>
+              <Pill
+                label="punctuation"
+                active={settings.punctuation}
+                onClick={() => set({ punctuation: !settings.punctuation })}
+              >
+                punctuation
+              </Pill>
+              <Pill
+                label="numbers"
+                active={settings.numbers}
+                onClick={() => set({ numbers: !settings.numbers })}
+              >
+                numbers
+              </Pill>
+              <Pill
+                label="word length"
+                active={!!settings.wordLength && settings.wordLength !== "any"}
+                onClick={() =>
+                  set({
+                    wordLength:
+                      WORD_LENGTHS[
+                        (WORD_LENGTHS.indexOf(settings.wordLength ?? "any") + 1) %
+                          WORD_LENGTHS.length
+                      ],
+                  })
+                }
+              >
+                abc {settings.wordLength ?? "any"}
+              </Pill>
+              <Pill
+                label="word pool: common everyday words or rare long ones"
+                active={!!settings.wordPool && settings.wordPool !== "all"}
+                onClick={() =>
+                  set({
+                    wordPool:
+                      WORD_POOLS[
+                        (WORD_POOLS.indexOf(settings.wordPool ?? "all") + 1) %
+                          WORD_POOLS.length
+                      ],
+                  })
+                }
+              >
+                pool {settings.wordPool ?? "all"}
+              </Pill>
+              <Divider />
+            </>
+          )}
+          <Pill
+            label="sudden death — test ends on the first mistake"
+            active={!!settings.suddenDeath}
+            onClick={() => set({ suddenDeath: !settings.suddenDeath })}
+          >
+            sudden death
+          </Pill>
+          <Pill
+            label="fix errors before moving on"
+            active={!!settings.forceCorrect}
+            onClick={() => set({ forceCorrect: !settings.forceCorrect })}
+          >
+            fix first
+          </Pill>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-0.5">
+          <span className="mx-1 self-center text-[13px] text-sub/70 select-none sm:text-sm">
+            caret
+          </span>
+          {["line", "block", "underline"].map((c) => (
+            <Pill
+              key={c}
+              group="cfg-caret"
+              label={`caret style ${c}`}
+              active={caretStyle === c}
+              onClick={() => set({ caretStyle: c })}
+            >
+              {c}
+            </Pill>
+          ))}
+
+          <Divider />
+          <Pill
+            label="show a ghost caret that replays your personal best"
+            active={settings.ghost === true}
+            onClick={() => set({ ghost: !settings.ghost })}
+          >
+            pb ghost
+          </Pill>
+          <Pill
+            label="calm mode — no background animation, ghost or flashes"
+            active={settings.calm === true}
+            onClick={() => set({ calm: !settings.calm })}
+          >
+            calm
+          </Pill>
+          </div>
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {customOpen && (

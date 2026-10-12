@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import WordInsights from "./WordInsights"
 import { AnimatePresence, motion } from "framer-motion"
 import { useCountUp } from "../hooks/useCountUp"
 import WpmChart from "./WpmChart"
@@ -199,7 +200,7 @@ function Confetti() {
   )
 }
 
-export default function ResultScreen({ result, onNext }) {
+export default function ResultScreen({ result, onNext, onPracticeWords }) {
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(null)
 
@@ -338,6 +339,10 @@ export default function ResultScreen({ result, onNext }) {
             </span>
           </SmallStat>
         </div>
+      </motion.div>
+
+      <motion.div variants={item}>
+        <WordInsights result={result} onPractice={onPracticeWords} />
       </motion.div>
 
       <motion.div variants={item} className="glass rounded-2xl border border-sub/15 bg-surface p-4 pt-3">

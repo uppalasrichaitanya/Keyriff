@@ -2552,3 +2552,9 @@ html[data-caret="underline"] .caret-bar {
     animation: none;
   }
 }
+
+/* calm mode: no ambient flair, ghost or flash — only the typing surface */
+html[data-calm="1"] .streak-flash,
+html[data-calm="1"] .caret-ghost {
+  display: none;
+}

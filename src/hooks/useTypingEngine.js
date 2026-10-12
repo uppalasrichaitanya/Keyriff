@@ -7,7 +7,7 @@ import {
   computeMissed,
   formatMode,
   pbKey,
-  wordLenOpts,
+  wordOpts,
   isTimedMode,
   dateKey,
   dailySeed,
@@ -276,7 +276,7 @@ export function useTypingEngine(settings, handlers = {}) {
             sampleWordsSeeded(30, dailySeed() ^ (wi + 1))
           )
         } else {
-          more = sampleWords(30, wordLenOpts(s.wordLength))
+          more = sampleWords(30, wordOpts(s))
           if (s.numbers) more = applyNumbers(more)
           if (s.punctuation) more = applyPunctuation(more)
         }

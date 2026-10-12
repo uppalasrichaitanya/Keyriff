@@ -26,8 +26,16 @@ export function wordLenOpts(wordLength) {
   return {}
 }
 
+/* every word-sampling filter a settings object asks for */
+export function wordOpts(settings) {
+  const opts = wordLenOpts(settings.wordLength)
+  if (settings.wordPool === "common" || settings.wordPool === "rare")
+    opts.pool = settings.wordPool
+  return opts
+}
+
 export function generateTest(settings) {
-  const { mode, timeValue, wordValue, punctuation, numbers, wordLength } = settings
+  const { mode, timeValue, wordValue, punctuation, numbers } = settings
   if (mode === "quote") {
     return sampleQuote().text.trim().split(/\s+/)
   }
@@ -42,7 +50,7 @@ export function generateTest(settings) {
   }
   const count =
     mode === "time" ? Math.max(50, timeValue * 4) : wordValue
-  let words = sampleWords(count, wordLenOpts(wordLength))
+  let words = sampleWords(count, wordOpts(settings))
   if (numbers) words = applyNumbers(words)
   if (punctuation) words = applyPunctuation(words)
   return words
@@ -176,6 +184,8 @@ export function pbKey(settings, wordCount) {
   if (settings.numbers) key = `${key}-num`
   if (settings.wordLength && settings.wordLength !== "any")
     key = `${key}-${settings.wordLength}`
+  if (settings.wordPool === "common" || settings.wordPool === "rare")
+    key = `${key}-${settings.wordPool}`
   return key
 }
 
@@ -197,5 +207,7 @@ export function formatMode(settings, wordCount) {
   if (settings.numbers) label = `${label} · num`
   if (settings.wordLength && settings.wordLength !== "any")
     label = `${label} · ${settings.wordLength}`
+  if (settings.wordPool === "common" || settings.wordPool === "rare")
+    label = `${label} · ${settings.wordPool}`
   return label
 }

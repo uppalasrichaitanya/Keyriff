@@ -237,12 +237,23 @@ function sampleFrom(pool, n, drawIndex) {
   return out
 }
 
-export function sampleWords(n, { min = 0, max = Infinity } = {}) {
-  const pool =
-    min > 0 || max < Infinity
-      ? WORDS.filter((w) => w.length >= min && w.length <= max)
-      : WORDS
-  return sampleFrom(pool, n, (len) => rand(len))
+/* the head of the list is the everyday core, ordered roughly by how common
+   each word is; "rare" is the long, uncommon tail */
+export const COMMON_SIZE = 300
+export const RARE_MIN_LEN = 7
+
+function poolFor({ min = 0, max = Infinity, pool = "all" } = {}) {
+  let list = WORDS
+  if (pool === "common") list = WORDS.slice(0, COMMON_SIZE)
+  else if (pool === "rare")
+    list = WORDS.slice(COMMON_SIZE).filter((w) => w.length >= RARE_MIN_LEN)
+  return min > 0 || max < Infinity
+    ? list.filter((w) => w.length >= min && w.length <= max)
+    : list
+}
+
+export function sampleWords(n, opts = {}) {
+  return sampleFrom(poolFor(opts), n, (len) => rand(len))
 }
 
 export function sampleWordsSeeded(n, seed, { min = 0, max = Infinity } = {}) {

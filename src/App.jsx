@@ -19,6 +19,7 @@ import { useShowcase } from "./hooks/useShowcase"
 import { applyTheme, getTheme, ambientFor } from "./lib/themes"
 import { rowOfChar, colOfChar, targetsFor } from "./lib/keys"
 import { sampleWeakWords } from "./lib/engine"
+import { addToHistory, HISTORY_MAX } from "./lib/history"
 import { screenMotion } from "./lib/motion"
 import { anyDialogOpen } from "./lib/dialogs"
 import {
@@ -46,10 +47,13 @@ const DEFAULT_SETTINGS = {
   showHeat: false,
   forceCorrect: false,
   wordLength: "any",
+  wordPool: "all",
   fontSize: "m",
   kbStyle: "laser",
   suddenDeath: false,
   ghost: false,
+  calm: false,
+  moreOpen: false,
 }
 
 function RestartIcon() {
@@ -109,6 +113,11 @@ export default function App() {
   pbsRef.current = pbs
 
   const theme = getTheme(themeId)
+  const calm = settings.calm === true
+
+  useEffect(() => {
+    document.documentElement.dataset.calm = calm ? "1" : ""
+  }, [calm])
 
   /* zen is a test-screen-only mode */
   useEffect(() => {
@@ -195,12 +204,7 @@ export default function App() {
           },
         }))
       }
-      setHistory((prev) =>
-        [
-          { ...result, events: [], words: [] },
-          ...prev,
-        ].slice(0, 50)
-      )
+      setHistory((prev) => addToHistory(prev, result))
       // accumulate per-key accuracy from this test's keystrokes
       setKeyStats((prev) => {
         const next = { ...prev }
@@ -233,7 +237,7 @@ export default function App() {
   /* regenerate when generation settings change — but not on mount
      (the engine already generates its first test). A settings
      signature makes this StrictMode-safe. */
-  const genKey = `${settings.mode}|${settings.timeValue}|${settings.wordValue}|${settings.punctuation}|${settings.numbers}|${settings.wordLength}|${settings.customText}`
+  const genKey = `${settings.mode}|${settings.timeValue}|${settings.wordValue}|${settings.punctuation}|${settings.numbers}|${settings.wordLength}|${settings.wordPool}|${settings.customText}`
   const genKeyRef = useRef(genKey)
   useEffect(() => {
     if (genKeyRef.current === genKey) return
@@ -334,13 +338,42 @@ export default function App() {
     setScreen("test")
   }, [engine])
 
+  /* drill the words that cost the most in the last run: cycle them in a
+     shuffled order so the same word never repeats back to back */
+  const startWordDrill = useCallback(
+    (list) => {
+      const pool = [...new Set(list)].filter(Boolean)
+      if (!pool.length) return
+      const make = (n) => {
+        const out = []
+        let last = null
+        while (out.length < n) {
+          const round = [...pool].sort(() => Math.random() - 0.5)
+          if (round.length > 1 && round[0] === last) round.push(round.shift())
+          out.push(...round)
+          last = out[out.length - 1]
+        }
+        return out.slice(0, n)
+      }
+      engine.startWith(make(60), {
+        key: "practice",
+        label: "practice · problem words",
+        durationSec: 30,
+        generate: make,
+      })
+      setZen(false)
+      setScreen("test")
+    },
+    [engine]
+  )
+
   const importData = useCallback(
     (data) => {
       if (!data || typeof data !== "object") return false
       if (data.settings)
         setSettings((s) => ({ ...s, ...data.settings, mode: s.mode }))
       if (data.theme) setThemeId(data.theme)
-      if (Array.isArray(data.history)) setHistory(data.history.slice(0, 200))
+      if (Array.isArray(data.history)) setHistory(data.history.slice(0, HISTORY_MAX))
       if (data.pbs && typeof data.pbs === "object") setPbs(data.pbs)
       if (data.keyStats && typeof data.keyStats === "object")
         setKeyStats(data.keyStats)
@@ -398,7 +431,7 @@ export default function App() {
      and decays to calm at idle/finish. The loop sleeps once settled. */
   const energyRef = useRef({ value: 0, typed: null, at: 0 })
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    if (calm || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       document.documentElement.style.setProperty("--typing-energy", "0")
       return
     }
@@ -428,7 +461,7 @@ export default function App() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [typed, status, rollingWpm])
+  }, [typed, status, rollingWpm, calm])
 
   const wordIndex = typed.length - 1
   const currentInput = typed[wordIndex] ?? ""
@@ -440,7 +473,7 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-full flex-col">
         <h1 className="sr-only">keyriff — typing trainer</h1>
-        <div className="bgfx" aria-hidden>
+        {!calm && <div className="bgfx" aria-hidden>
           {theme.flair !== "matrix" && (
             <>
               <span className="orb orb1" style={theme.flair ? { opacity: 0.55 } : undefined} />
@@ -464,8 +497,8 @@ export default function App() {
               <span className="drop d6" />
             </>
           )}
-        </div>
-        {theme.flair === "matrix" ? (
+        </div>}
+        {calm ? null : theme.flair === "matrix" ? (
           <div className="flair-matrix" aria-hidden>
             <MatrixRain />
           </div>
@@ -589,7 +622,7 @@ export default function App() {
             <motion.div
               key="test"
               {...screenMotion("test")}
-              className={`flex flex-col ${zen ? "gap-4" : "gap-9"}`}
+              className={`flex flex-col ${zen ? "gap-4" : "gap-6 [@media(min-height:800px)]:gap-9"}`}
             >
               {!zen && (
                 <AnimatePresence>
@@ -638,7 +671,7 @@ export default function App() {
                   blurred={blurred}
                   zen={zen}
                   fontSize={settings.fontSize}
-                  showGhost={settings.ghost === true}
+                  showGhost={settings.ghost === true && !calm}
                   onFocusRequest={requestFocus}
                 />
                 <ProgressBar
@@ -772,7 +805,7 @@ export default function App() {
           ) : (
             lastResult && (
               <motion.div key="result" {...screenMotion("result")}>
-                <ResultScreen result={lastResult} onNext={nextTest} />
+                <ResultScreen result={lastResult} onNext={nextTest} onPracticeWords={startWordDrill} />
               </motion.div>
             )
           )}
